@@ -1,6 +1,6 @@
 {
   "name": "tilda-chrome-ext",
-  "description": "chrome extention to parse tilda json schema",
+  "description": "",
   "main": "bower.json",
   "moduleType": [],
   "authors": [
