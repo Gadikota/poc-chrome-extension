@@ -21,6 +21,8 @@
     "jquery": "2.1",
     "lodash": "3.10.1",
     "jointjs": "^0.9.10",
-    "requirejs": "^2.2.0"
+    "requirejs": "^2.2.0",
+    "graphlib": "^2.1.0",
+    "requirejs-plugins": "^1.0.3"
   }
 }

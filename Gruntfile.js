@@ -23,8 +23,23 @@ config = function(grunt) {
             expand: true,
             flatten: true,
             cwd: 'bower_components',
-            src: ['requirejs/require.js', 'underscore/underscore.js', 'lodash/lodash.js', 'jointjs/dist/joint.min.js', 'backbone/backbone.js', 'jquery/dist/jquery.js'],
+            src: ['requirejs/require.js', 'underscore/underscore.js', 'lodash/lodash.js',
+             'jointjs/dist/joint.js', 'backbone/backbone.js', 'jquery/dist/jquery.js', 'graphlib/dist/graphlib.core.js'],
             dest: 'output/js/lib'
+          },
+          {
+            expand: true,
+            flatten: true,
+            cwd: 'bower_components',
+            src: ['requirejs-plugins/src/*.js'],
+            dest: 'output/js/lib/require'
+          },
+          {
+            expand: true,
+            flatten: true,
+            cwd: 'bower_components',
+            src: ['requirejs-plugins/lib/text.js', 'requirejs-plugins/lib/Markdown.Converter.js'],
+            dest: 'output/js/lib/require'
           }
         ]
       },
