@@ -154,6 +154,16 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
             '.connection': { stroke: 'rgb(0,176,80)', 'stroke-width': 1, 'stroke-dasharray': '5 2' }
           })
         }
+      } else if(source.get('_type') == "Mapper"){
+        if(target.get("inSchema")){
+          attrs = _.merge(attrs, {
+            '.connection': { stroke: 'rgb(248,203,173)', 'stroke-width': 1 }
+          })
+        } else {
+          attrs = _.merge(attrs, {
+            '.connection': { stroke: 'rgb(248,203,173)', 'stroke-width': 1, 'stroke-dasharray': '5 2' }
+          })
+        }
       }
       var link = new joint.dia.Link({
         source: { id: source.get("graphId") },
@@ -218,6 +228,24 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
 
       },
       "Mapper": function(graph, collection, index){
+        var rels = [];
+        var object = collection.at(index)
+        _.each(object.get("data").primaryColumns, function(ele, i){
+          if(ele.sameas != null && ele.sameas.split(".").length > 1 ){
+            rels.push(ele.sameas.split(".").reverse()[1]);
+          }
+        })
+        rels = _.uniq(rels);
+        _.each(rels, function(relation, i){
+          var target = that.objects.findWhere({name: relation}, {caseInsensitive: true})
+          if(target == null){
+            target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
+            that.objects.add(target);
+            var i = collection.size();
+            renderObject[target.get("_type")](graph, collection, collection.indexOf(target));
+          }
+          renderLink(graph, object, target)
+        })
 
       }
     }
@@ -229,7 +257,7 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
         width: window.screen.availWidth,
         height: window.screen.availHeight-80,
         model: graph,
-        gridSize: 1,
+        gridSize: 10,
         restrictTranslate: true
       });
       var dragStartPosition = null;
