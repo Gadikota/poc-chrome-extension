@@ -81,8 +81,7 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
         }
         position[event.get("id")] = event.toJSON();
       }
-      var renderObjectsFromJSON = function(graph, collection, position){
-        var object = collection.at(position);
+      var renderObjectsFromJSON = function(graph, object){
         var jsonArray = _.values(object.get("data").position);
         _.each(jsonArray, function(objectAttr){
           var t = new joint.shapes.basic.Rect(objectAttr)
@@ -92,11 +91,10 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
         })
       }
       var renderObject = {
-        "View": function(graph, collection, position){
-          var object = collection.at(position);
+        "View": function(graph, object){
           gotoNextPosition(currentPos);
           if(object.get("data").position != null){
-            renderObjectsFromJSON(graph, collection, position);
+            renderObjectsFromJSON(graph, object);
           }
           else{
             var objectAttr = {
@@ -115,12 +113,11 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
             graph.addCell(t);
           }
         },
-        "Object": function(graph, collection, position){
-          var object = collection.at(position);
+        "Object": function(graph, object){
           var objectAttr = {}
           gotoNextPosition(currentPos);
           if(object.get("data").position != null){
-            renderObjectsFromJSON(graph, collection, position);
+            renderObjectsFromJSON(graph, object);
           }
           else{
 
@@ -152,11 +149,10 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
             graph.addCell(t);
           }
         },
-        "Enumeration": function(graph, collection, position){
-          var object = collection.at(position);
+        "Enumeration": function(graph, object){
           gotoNextPosition(currentPos);
           if(object.get("data").position != null){
-            renderObjectsFromJSON(graph, collection, position);
+            renderObjectsFromJSON(graph, object);
           }
           else{
             var objectAttr = {
@@ -175,11 +171,10 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
             graph.addCell(t);
           }
         },
-        "Mapper": function(graph, collection, position){
-          var object = collection.at(position);
+        "Mapper": function(graph, object){
           gotoNextPosition(currentPos);
           if(object.get("data").position != null){
-            renderObjectsFromJSON(graph, collection, position);
+            renderObjectsFromJSON(graph, object);
           }
           else{
 
@@ -263,8 +258,7 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
 
       var renderObjectRelations = {
         // This method will add outSchema object
-        "Object": function(graph, collection, index){
-          var object = collection.at(index);
+        "Object": function(graph, object, superset){
           if(object.get("data").foreign != null){
             // var rels = _.map(object.get("data").foreign, function(ele, i){ return ele.destObject });
             var rels = [];
@@ -275,20 +269,20 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
             })
             rels = _.uniq(rels);
             _.each(rels, function(relation, i){
-              var target = collection.findWhere({name: relation}, {caseInsensitive: true})
+              var target = superset.findWhere({name: relation}, {caseInsensitive: true})
               if(target == null){
                 target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
-                collection.add(target);
-                var i = collection.size();
-                renderObject[target.get("_type")](graph, collection, collection.indexOf(target));
+                superset.add(target);
+                renderObject[target.get("_type")](graph, target);
+              } else if(target.get("graphId") == null){// which means object is on in graph
+                renderObject[target.get("_type")](graph, target);
               }
               renderLink(graph, object, target)
             })
           }
         },
-        "View": function(graph, collection, index){
+        "View": function(graph, object, superset){
           var rels = [];
-          var object = collection.at(index)
           _.each(object.get("data").columns, function(ele, i){
             if(ele.sameas != null && ele.sameas.split(".").length > 1 ){
               rels.push(ele.sameas.split(".").reverse()[1]);
@@ -296,20 +290,20 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
           })
           rels = _.uniq(rels);
           _.each(rels, function(relation, i){
-            var target = that.objects.findWhere({name: relation}, {caseInsensitive: true})
+            var target = superset.findWhere({name: relation}, {caseInsensitive: true})
             if(target == null){
               target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
-              that.objects.add(target);
-              var i = collection.size();
-              renderObject[target.get("_type")](graph, collection, collection.indexOf(target));
+              superset.add(target);
+              renderObject[target.get("_type")](graph, target);
+            } else if(target.get("graphId") == null){// which means object is on in graph
+              renderObject[target.get("_type")](graph, target);
             }
             renderLink(graph, object, target)
           })
 
         },
-        "Mapper": function(graph, collection, index){
+        "Mapper": function(graph, object, superset){
           var rels = [];
-          var object = collection.at(index)
           _.each(object.get("data").primaryColumns, function(ele, i){
             if(ele.sameas != null && ele.sameas.split(".").length > 1 ){
               rels.push(ele.sameas.split(".").reverse()[1]);
@@ -317,13 +311,15 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
           })
           rels = _.uniq(rels);
           _.each(rels, function(relation, i){
-            var target = that.objects.findWhere({name: relation}, {caseInsensitive: true})
+            var target = superset.findWhere({name: relation}, {caseInsensitive: true})
             if(target == null){
               target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
-              that.objects.add(target);
-              var i = collection.size();
-              renderObject[target.get("_type")](graph, collection, collection.indexOf(target));
+              superset.add(target);
+              renderObject[target.get("_type")](graph, target);
+            } else if(target.get("graphId") == null){// which means object is on in graph
+              renderObject[target.get("_type")](graph, target);
             }
+
             renderLink(graph, object, target)
           })
 
@@ -334,7 +330,7 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
       var paper = new joint.dia.Paper({
         el: $("#"+this.eleId),
         width: window.screen.availWidth,
-        height: window.screen.availHeight-80,
+        height: (window.screen.availHeight-80),
         model: graph,
         gridSize: 10,
         restrictTranslate: true
@@ -384,16 +380,17 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
         return pointTransformed;
       }
       var that = this;
+
       _.each(this.objects, function(object, i){
         var object = that.objects.at(i);
         if (renderObject[object.get("_type")] != null){
-          renderObject[object.get("_type")](graph, that.objects, i);
+          renderObject[object.get("_type")](graph, object);
         }
       })
       _.each(this.objects, function(object, i){
-        var object = that.objects.at(i)
+        var object = that.objects.at(i);
         if(renderObjectRelations[object.get("_type")] != null){
-          renderObjectRelations[object.get("_type")](graph, that.objects, i);
+          renderObjectRelations[object.get("_type")](graph, object, that.objects);
         }
       })
     }
@@ -453,6 +450,7 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
           that.schema = JSON.parse(event.target.result);
           that.parse();
           that.render();
+
         } catch(e){
           console.log("Error occured -> "+e.message);
           console.error(e.stack);
