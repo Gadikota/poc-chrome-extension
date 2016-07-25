@@ -327,9 +327,9 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
               if(target == null){
                 target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
                 superset.add(target);
-                renderObject[target.get("_type")](graph, target);
+                renderObject[target.get("_type")](graph, target, gotoNextPosition(currentPos));
               } else if(target.get("graphId") == null){// which means object is on in graph
-                renderObject[target.get("_type")](graph, target);
+                renderObject[target.get("_type")](graph, target, gotoNextPosition(currentPos));
               }
               renderLink(graph, object, target)
             })
@@ -348,9 +348,9 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
             if(target == null){
               target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
               superset.add(target);
-              renderObject[target.get("_type")](graph, target);
+              renderObject[target.get("_type")](graph, target, gotoNextPosition(currentPos));
             } else if(target.get("graphId") == null){// which means object is on in graph
-              renderObject[target.get("_type")](graph, target);
+              renderObject[target.get("_type")](graph, target, gotoNextPosition(currentPos));
             }
             renderLink(graph, object, target)
           })
@@ -369,9 +369,9 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
             if(target == null){
               target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
               superset.add(target);
-              renderObject[target.get("_type")](graph, target);
+              renderObject[target.get("_type")](graph, target, gotoNextPosition(currentPos));
             } else if(target.get("graphId") == null){// which means object is on in graph
-              renderObject[target.get("_type")](graph, target);
+              renderObject[target.get("_type")](graph, target, gotoNextPosition(currentPos));
             }
 
             renderLink(graph, object, target)
@@ -442,6 +442,7 @@ define(["jointjs", "./parser_element"], function(joint, ParserElement){
         if (renderObject[object.get("_type")] != null){
           chrome.storage.sync.get(key, function(objectAttr){
             var position = gotoNextPosition(currentPos);
+            // console.log("Object --> "+JSON.stringify(objectAttr)+"\n");
             renderObject[object.get("_type")](graph, object, position, objectAttr[key]);
             if(i == that.objects.length-1){
               // Hack todo research
