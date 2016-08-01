@@ -92,8 +92,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         return currentPos;
       }
 
-      console.error("ELE -> "+this.eleId);
-      console.error("viewOnly -> "+JSON.stringify(this.opts));
       var graph = new joint.dia.Graph;
       var paper = new joint.dia.Paper({
         el: $("#"+this.eleId),
@@ -151,7 +149,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         }
         // Store preferences.
         var syncSet = {};
-        console.log("key -> "+key+"\nObject -> "+JSON.stringify(event.toJSON()));
         syncSet[key] = event.toJSON();
         chrome.storage.local.set(syncSet);
       }
@@ -171,8 +168,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           var objectAttr = window.tildaCache[key];
           var t = renderObject[object.get("_type")](graph, object, position, objectAttr);
           object.set("graphId", t.get("id"));
-          console.log("graphId -> "+t.get("id"));
-          console.log("viewOnly -> "+JSON.stringify(that.opts));
           t.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
         }
       })

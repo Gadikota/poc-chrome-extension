@@ -12,7 +12,6 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           } 
         }
       }
-      console.log("objectAttr --> "+JSON.stringify(objectAttr)+"\n");
       var t = new joint.shapes.basic.Rect(objectAttr);
       // t.translate((position+1)*110, (position+1)*30);
       object.set({graphId: t.id})
