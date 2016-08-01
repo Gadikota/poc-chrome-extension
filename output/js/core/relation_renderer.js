@@ -3,7 +3,7 @@ define(["jointjs", "lodash", "jquery",
  function(joint, _, $, ParserElement, Helpers){
   var renderObject = Helpers.renderObject;
 
-  var renderLink = function(graph, source, target){
+  var renderLink = function(graph, source, target, superset){
     var attrs = {
       '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' }
     }
@@ -43,17 +43,21 @@ define(["jointjs", "lodash", "jquery",
       target: { id: target.get("graphId") },
       attrs: attrs
     });
-    link.on('change', _.debounce(function(element){
-      var source = element.getSourceElement();
-      var eventObject = that.objects.findWhere({graphId: source.get("id")});
-      var links = eventObject.get("data").links;
-      if(eventObject.get("data").links == null){
-        eventObject.get("data").links = {};
-        var links = eventObject.get("data").links;
-      }
-      links[element.get("id")] = element.toJSON();
-    }, 500, { 'maxWait' : 1000 }));
     graph.addCell(link);
+  }
+
+  var elementChangeHandler = function(superset, event){
+    var eventObject = superset.findWhere({graphId: event.get("id")});
+    var key = eventObject.get("pKey")+"#"+eventObject.get("name").toLowerCase();
+    var position = eventObject.get("data").position;
+    if(eventObject.get("data").position == null){
+      eventObject.get("data").position = {};
+      var position = eventObject.get("data").position;
+    }
+    // Store preferences.
+    var syncSet = {};
+    syncSet[key] = event.toJSON();
+    chrome.storage.local.set(syncSet);
   }
 
   var renderObjectRelations = {
@@ -68,16 +72,25 @@ define(["jointjs", "lodash", "jquery",
           }
         })
         rels = _.uniq(rels);
+        console.error("Rels "+JSON.stringify(rels))
         _.each(rels, function(relation, i){
+          var package = superset.at(0).get("package")
+          var pKey = superset.at(0).get("pKey");
+          var key = pKey+"#"+relation.toLowerCase();
           var target = superset.findWhere({name: relation}, {caseInsensitive: true})
           if(target == null){
-            target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
+            console.error("target -> "+relation);
+            target = new ParserElement({data: {name: relation }, name: relation,
+               _type: "Object", inSchema: false, package: package, pKey: pKey });
             superset.add(target);
-            renderObject[target.get("_type")](graph, target, position);
-          } else if(target.get("graphId") == null){// which means object is on in graph
-            renderObject[target.get("_type")](graph, target, position);
+            var objectAttr = window.tildaCache[key];
+            var t = renderObject[target.get("_type")](graph, target, position, objectAttr);
+            target.set({graphId: t.get("id")});
+            t.on('change:position', _.debounce(function(event){
+              elementChangeHandler(superset, event);
+            }, 500, { 'maxWait' : 1000 }));
           }
-          renderLink(graph, object, target)
+          renderLink(graph, object, target, superset)
         })
       }
     },
@@ -89,20 +102,28 @@ define(["jointjs", "lodash", "jquery",
         }
       })
       rels = _.uniq(rels);
+      console.error("Rels "+JSON.stringify(rels))
       _.each(rels, function(relation, i){
+        var package = superset.at(0).get("package")
+        var pKey = superset.at(0).get("pKey");
+        var key = pKey+"#"+relation.toLowerCase();
         var target = superset.findWhere({name: relation}, {caseInsensitive: true})
         if(target == null){
-          target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
+          target = new ParserElement({data: {name: relation }, name: relation,
+             _type: "Object", inSchema: false, package: package, pKey: pKey });
           superset.add(target);
-          renderObject[target.get("_type")](graph, target, position);
-        } else if(target.get("graphId") == null){// which means object is on in graph
-          renderObject[target.get("_type")](graph, target, position);
+          var objectAttr = window.tildaCache[key];
+          var t = renderObject[target.get("_type")](graph, target, position, objectAttr);
+          target.set({graphId: t.get("id")});
+          t.on('change:position', _.debounce(function(event){
+            elementChangeHandler(superset, event);
+          }, 500, { 'maxWait' : 1000 }));
         }
-        renderLink(graph, object, target)
+        renderLink(graph, object, target, superset)
       })
 
     },
-    "Mapper": function(graph, object, superset){
+    "Mapper": function(graph, object, superset, position){
       var rels = [];
       _.each(object.get("data").primaryColumns, function(ele, i){
         if(ele.sameas != null && ele.sameas.split(".").length > 1 ){
@@ -111,18 +132,24 @@ define(["jointjs", "lodash", "jquery",
       })
       rels = _.uniq(rels);
       _.each(rels, function(relation, i){
+        var package = superset.at(0).get("package")
+        var pKey = superset.at(0).get("pKey");
+        var key = pKey+"#"+relation.toLowerCase();
         var target = superset.findWhere({name: relation}, {caseInsensitive: true})
         if(target == null){
-          target = new ParserElement({data: {name: relation }, name: relation, _type: "Object", inSchema: false });
+          target = new ParserElement({data: {name: relation }, name: relation,
+             _type: "Object", inSchema: false, package: package, pKey: pKey });
           superset.add(target);
-          renderObject[target.get("_type")](graph, target, position, {});
-        } else if(target.get("graphId") == null){// which means object is on in graph
-          renderObject[target.get("_type")](graph, target, position, {});
+          var objectAttr = window.tildaCache[key];
+          var t = renderObject[target.get("_type")](graph, target, position, objectAttr);
+          target.set({graphId: t.get("id")});
+          t.on('change:position', _.debounce(function(event){
+            elementChangeHandler(superset, event);
+          }, 500, { 'maxWait' : 1000 }));
         }
 
-        renderLink(graph, object, target)
+        renderLink(graph, object, target, superset)
       })
-
     }
   }
   return renderObjectRelations;

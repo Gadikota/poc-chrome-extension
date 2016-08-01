@@ -15,18 +15,21 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
   var CustomElementView = CEV.CustomElementView;
   var renderObject = Helpers.renderObject;
   var renderObjectRelations = LinkRenderer;
-  var p = function(_file, eleId, opts){
-    this.objects = new ObjectCollection();
-    this.eleId = eleId;
-    this.paper = null;
+  var p = function(schema, eleId, opts){
+    this.schema = schema
     this.opts = opts;
+    this.eleId = eleId;
+    this.pKey = this.schema.package.toLowerCase()+"#"+this.opts.viewOnly;
+    this.objects = new ObjectCollection();
+    this.paper = null;
+
     var currentPos = { x: -150, y: 30 }
     this.parse = function(){
       var that = this;
       var pushElement = function(collection, schemaObj, _type, _inSchema){
         var t = new ParserElement();
         t.set({data: schemaObj, name: schemaObj.name,
-         _type: _type, inSchema: _inSchema, package: that.schema.package});
+         _type: _type, inSchema: _inSchema, package: that.schema.package, pKey: that.pKey});
         collection.add(t);
       }
       _.each(this.schema.objects, function(object, i){
@@ -89,7 +92,8 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         return currentPos;
       }
 
-
+      console.error("ELE -> "+this.eleId);
+      console.error("viewOnly -> "+JSON.stringify(this.opts));
       var graph = new joint.dia.Graph;
       var paper = new joint.dia.Paper({
         el: $("#"+this.eleId),
@@ -137,7 +141,20 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       });
 
       var that = this;
-
+      var elementChangeHandler = function(event){
+        var eventObject = that.objects.findWhere({graphId: event.get("id")});
+        var key = eventObject.get("pKey")+"#"+eventObject.get("name").toLowerCase();
+        var position = eventObject.get("data").position;
+        if(eventObject.get("data").position == null){
+          eventObject.get("data").position = {};
+          var position = eventObject.get("data").position;
+        }
+        // Store preferences.
+        var syncSet = {};
+        console.log("key -> "+key+"\nObject -> "+JSON.stringify(event.toJSON()));
+        syncSet[key] = event.toJSON();
+        chrome.storage.local.set(syncSet);
+      }
       var renderObjectRels = function(){
         _.each(that.objects, function(object, i){
           var object = that.objects.at(i);
@@ -148,40 +165,21 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       }
       _.each(this.objects, function(object, i){
         var object = that.objects.at(i);
-        var key = that.schema.package.toLowerCase()+"#"+object.get("name").toLowerCase();
+        var key = object.get("pKey")+"#"+object.get("name").toLowerCase();
         if (renderObject[object.get("_type")] != null){
-          chrome.storage.local.get(key, function(objectAttr){
-            var position = gotoNextPosition(currentPos);
-            console.log("Object --> "+JSON.stringify(objectAttr)+"\n");
-            renderObject[object.get("_type")](graph, object, position, objectAttr[key]);
-            if(i == that.objects.length-1){
-              // Hack todo research
-              renderObjectRels();
-            }
-          })
+          var position = gotoNextPosition(currentPos);
+          var objectAttr = window.tildaCache[key];
+          var t = renderObject[object.get("_type")](graph, object, position, objectAttr);
+          object.set("graphId", t.get("id"));
+          console.log("graphId -> "+t.get("id"));
+          console.log("viewOnly -> "+JSON.stringify(that.opts));
+          t.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
         }
       })
+      renderObjectRels();
     }
-
-    // start parsing
-    that = this;
-    var readFile = function(_file){
-      var reader = new FileReader();
-      reader.onload = function(event) {
-        try{
-          that.schema = JSON.parse(event.target.result);
-          var key = that.schema.package.toLowerCase();
-          that.parse();
-          that.render();
-        } catch(e){
-          console.error("Error occured -> "+e.message);
-          console.error(e.stack);
-        }
-      };
-      reader.readAsText(_file);
-    }
-    readFile(_file);
-
+    this.parse();
+    this.render();
   }
 
   return p;

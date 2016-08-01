@@ -25,22 +25,32 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser"], function(
     handleFileInput: function(event){
       var that = this;
       var file = $(event.target)[0].files[0]; // only one file at a time.
-
-
-      $("#obj_c").remove()
-      var p = document.createElement("div");
-      p.id = "obj_c";
-      this.$el.append($(p));
-      this.schemaParser_view = new _Parser(file, "obj_c", {viewOnly: false});
-      setTimeout(function(){
-        $("#view_c").remove();
-        var p2 = document.createElement("div");
-        p2.id = "view_c";
-        that.$el.append($(p2));
-        that.schemaParser_object = new _Parser(file, "view_c", {viewOnly: true});
-
-        that.$el.find("#view_c").hide(); // hide for now.        
-      }, 10000);
+      if(file == null){
+        return true;
+      }
+      $("#view_c").html("");
+      $("#obj_c").html("");
+      $("#obj_c").show();
+      $("#view_c").show();
+      chrome.storage.local.get(null, function(items) {
+        var allKeys = Object.keys(items);
+        window.tildaCache = items; // used across 
+        var readFile = function(_file){
+          var reader = new FileReader();
+          reader.onload = function(event) {
+            try{
+              var schema = JSON.parse(event.target.result);
+              that.schemaParser_object = new _Parser(_.clone(schema), "obj_c", {viewOnly: false});
+              that.schemaParser_view = new _Parser(_.clone(schema), "view_c", {viewOnly: true});
+            } catch(e){
+              console.error("Error occured -> "+e.message);
+              console.error(e.stack);
+            }
+          };
+          reader.readAsText(_file);
+        }
+        readFile(file);
+      })
 
     },
     saveSchema: function(event){
