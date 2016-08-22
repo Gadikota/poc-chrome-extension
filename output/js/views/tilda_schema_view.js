@@ -8,6 +8,8 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser"], function(
   }
   var TildaSchemaView = Backbone.View.extend({
     schemaName: null,
+    currentEntry: null,
+    packageInfo: null,
     events: {
       'click a[name="schema-file"]': 'handleFileInput',
       'click .saveSchema': 'saveSchema',
@@ -59,7 +61,7 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser"], function(
           var reader = new FileReader();
           reader.onload = function(event) {
             try{
-              var tildaCache = JSON.parse(event.target.result).tildaCache || {};
+              var tildaCache = JSON.parse(event.target.result) || {};
               resolve(tildaCache)
             } catch(e){
               resolve({})
@@ -111,7 +113,8 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser"], function(
       var init = function(entry){
         var p = that.initPackageInfo(entry)
         p.then(function(pkgInfo){
-          var cacheName = "_tilda."+pkgInfo.schema.name+".graph.json";
+          var cacheName = "_tilda."+pkgInfo.schema.name+".graphInfo.json";
+          that.packageInfo = pkgInfo;
           that.initCache(cacheName, entry).then(function(cache){
             window.tildaCache = cache;
             var schemaFname = "_tilda."+pkgInfo.schema.name+".json";
@@ -124,27 +127,32 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser"], function(
         p.catch(error);
       }
       chrome.fileSystem.chooseEntry({ type: 'openDirectory'},  function(entry, fileEntries) {
+        that.currentEntry = entry;
         init(entry);
       });
       return 0;
     },
     saveSchema: function(event){
+      this.writeUserPrefs(this.currentEntry, event);
+      this.writeSVG(this.currentEntry, event);
+    },
+    writeSVG: function(entry, event){
       // TODO write to a file.
       var objSVG = this.schemaParser_object.paper.$el.find("svg")[0]
 
       var viewSVG = this.schemaParser_view.paper.$el.find("svg")[0];
       var that = this;
-      $.get('css/joint.css', function(css){
-        chrome.fileSystem.chooseEntry( {
-          type: 'saveFile',
-          acceptsAllTypes: true
-        }, function(fileEntry){
+      var fileName = "_tilda."+this.packageInfo.schema.name+".html";
+      var docText = _.map(that.schemaParser_object.schema.documentation.description, function(line){
+        return "<h4>"+line+"</h4>\n"
+      }).join("\n")
+      $.get('css/viewonly_joint.css', function(css){
+        entry.getFile(fileName, {create: true}, function(fileEntry){
           fileEntry.createWriter(function(fileWriter) {
             var truncated = false;
             var script = "\n\
               <script>\n\
                 window.onload = function(){\n\
-                  debugger;\n\
                   var svgs = document.getElementsByTagName('svg');\n\
                   for(i=0;i<svgs.length;i++){\n\
                     var svg = svgs[i];\n\
@@ -155,10 +163,20 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser"], function(
                   }\n\
                 }\n\
               </script>";
-            var blob = new Blob(["<style>"+css+"</style>", "<div class='container'>"
-              +objSVG.parentElement.innerHTML,"</div>", "<br/>"
-              ,"<div class='container'>", viewSVG.parentElement.innerHTML,"</div>"
-              , script], {type: "image/svg"});
+            var blob = new Blob(["<style>"+css+"</style>", 
+                "\n<h1> Schema ", that.packageInfo.schema.name, "</h1>\n",
+                "<p>", docText,"</p>\n",
+                "<div><h1>Views Graph</h1></div>\n",
+                "<div class='container'>\n",
+                objSVG.parentElement.innerHTML,
+                "\n</div>\n", 
+                "<br/>\n",
+                "<div><h1>Views Graph</h1></div>\n",
+                "<div class='container'>\n",
+                viewSVG.parentElement.innerHTML,
+                "\n</div>\n",
+                script
+              ], {type: "image/svg"});
             fileWriter.onwriteend = function(e) {
               if (!truncated) {
                 truncated = true;
@@ -174,10 +192,30 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser"], function(
             };
             fileWriter.write(blob);
           });
-        });        
+        })
       })
-
-
+    },
+    writeUserPrefs: function(entry, event){
+      var fileName = "_tilda."+this.packageInfo.schema.name+".graphInfo.json";
+      entry.getFile(fileName, {create: true}, function(fileEntry){
+        fileEntry.createWriter(function(fileWriter) {
+          var blob = new Blob([JSON.stringify(window.tildaCache,null,2)]);
+          fileWriter.onwriteend = function(e) {
+            if (!truncated) {
+              truncated = true;
+              // You need to explicitly set the file size to truncate
+              // any content that might have been there before
+              this.truncate(blob.size);
+              return;
+            }
+            console.log('Export to '+fileDisplayPath+' completed');
+          };
+          fileWriter.onerror = function(e) {
+            console.error('Export failed: '+e.toString());
+          };
+          fileWriter.write(blob);
+        });
+      });
     },
     resetView: function(event){
       if(this.schemaParser_object){

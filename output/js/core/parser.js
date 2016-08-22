@@ -78,8 +78,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         // Store preferences.
         var syncSet = {};
         // console.log("key -> "+key+"\nObject -> "+JSON.stringify(event.toJSON()));
-        syncSet[key] = event.toJSON();
-        chrome.storage.local.set(syncSet);
+        window.tildaCache[key] = event.toJSON();
       }
 
       var gotoNextPosition = function(currentPos){
@@ -148,9 +147,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           var position = eventObject.get("data").position;
         }
         // Store preferences.
-        var syncSet = {};
-        syncSet[key] = event.toJSON();
-        chrome.storage.local.set(syncSet);
+        window.tildaCache[key] = event.toJSON();
       }
       var renderObjectRels = function(){
         _.each(that.objects, function(object, i){

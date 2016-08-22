@@ -60,8 +60,7 @@ define(["jointjs", "lodash", "jquery",
       var key = event.get("attrs").key.toLowerCase();
       var syncSet = {}
       var attributes = event.attributes;
-      syncSet[key] = _.merge(attributes, { vertices: this.get('vertices') })
-      chrome.storage.local.set(syncSet);
+      window.tildaCache[key] = _.merge(attributes, { vertices: this.get('vertices') })
     }
     if(vertices){
       link.set('vertices', vertices);
@@ -80,8 +79,7 @@ define(["jointjs", "lodash", "jquery",
     }
     // Store preferences.
     var syncSet = {};
-    syncSet[key] = event.toJSON();
-    chrome.storage.local.set(syncSet);
+    window.tildaCache[key] = event.toJSON();
   }
 
   var renderObjectRelations = {
