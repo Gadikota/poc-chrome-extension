@@ -87,6 +87,8 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser", '../core/f
     render: function(){
       var that = this;
       that.$el.html(_NewView);
+      var $select = that.$el.find('select');
+      $select.hide();
       return this;
     },
     schemaFrom: function(fileEntry){
@@ -139,6 +141,7 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser", '../core/f
     handleFileInput: function(event){
       var that = this;
       var $select = that.$el.find('select');
+      $select.hide();
       var error = function(error){
         console.log(error.message);
         console.log(error.stack);
@@ -158,6 +161,7 @@ define(['text!../templates/tilda_schema/_new.html', "../core/parser", '../core/f
             var file = files[i];
             $select.append('<option value=\''+i+'\'>'+file.name+'</option')
           }
+          $select.show();
         })
       });
       return 0;
