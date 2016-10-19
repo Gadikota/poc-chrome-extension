@@ -23,6 +23,7 @@
     "jointjs": "^0.9.10",
     "requirejs": "^2.2.0",
     "graphlib": "^2.1.0",
-    "requirejs-plugins": "^1.0.3"
+    "requirejs-plugins": "^1.0.3",
+    "bootstrap": "*"
   }
 }

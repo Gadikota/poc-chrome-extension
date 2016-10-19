@@ -14,6 +14,13 @@ config = function(grunt) {
             cwd: 'bower_components',
             src: ['jointjs/dist/joint.css'],
             dest: 'output/css'
+          },
+          {
+            expand: true,
+            flatten: true,
+            cwd: 'bower_components',
+            src: ['bootstrap/dist/css/bootstrap.css'],
+            dest: 'output/css'
           }
         ]
       },
@@ -40,6 +47,13 @@ config = function(grunt) {
             cwd: 'bower_components',
             src: ['requirejs-plugins/lib/text.js', 'requirejs-plugins/lib/Markdown.Converter.js'],
             dest: 'output/js/lib/require'
+          },
+          {
+            expand: true,
+            flatten: true,
+            cwd: 'bower_components',
+            src: ['bootstrap/dist/js/bootstrap.js'],
+            dest: 'output/js/lib'
           }
         ]
       },
