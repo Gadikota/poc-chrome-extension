@@ -140,6 +140,8 @@ define(['text!../templates/tilda_schema/_new.html',
             that.$el.find('.regex-f').val(value);
           }
         });        
+      } else {
+        that.excludeRegex = new RegExp("\/bin\/*", "i"); // default filter
       }
 
       that.$el.find('.actions').hide();
