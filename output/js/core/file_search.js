@@ -32,11 +32,9 @@ define(function(){
             }
           }
           if(entries.length >= 90){
-            console.log("Eeee");
             readEntries(directoryReader);
           }
           counter--;
-          console.log("Eeee 1");
           if (counter === 0 && callback) {
             callback(files)
           }
@@ -45,7 +43,6 @@ define(function(){
         });
       }
       directoryReader = entryPoint.createReader();
-      console.log("Eeee 2");
       readEntries(directoryReader);
     };
     readFolder(firstEntry, runAfterCompletion);
