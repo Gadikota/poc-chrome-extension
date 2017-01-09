@@ -22,7 +22,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.pKey = this.schema.package.toLowerCase()+"#"+this.opts.viewOnly;
     this.objects = new ObjectCollection();
     this.paper = null;
-    console.log("pKey --> "+this.pKey)
+    console.log("pKey --> "+this.pKey);
     var currentPos = { x: -150, y: 30 }
     this.parse = function(){
       var that = this;
@@ -39,7 +39,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         _.each(this.schema.views, function(view, i){
           pushElement(that.objects, view, "View", true)
         })
-        debugger;
       }
       else{
         _.each(this.schema.enumerations, function(enumeration, i){

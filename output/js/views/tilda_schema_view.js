@@ -85,7 +85,8 @@ define(['text!../templates/tilda_schema/_new.html',
             that.$el.find("#obj_c").show();
             var opts = _.merge(that.schemaEntries, {viewOnly: false});
             that.schemaParser_object = new _Parser(_.clone(schema), "obj_c", opts);
-            opts = _.merge(opts, {viewOnly: false})
+            opts = _.clone(opts);
+            opts.viewOnly = true;
             that.schemaParser_view = new _Parser(_.clone(schema), "view_c", opts);
           }).catch(error);
         }).catch(error);
