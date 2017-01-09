@@ -39,6 +39,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         _.each(this.schema.views, function(view, i){
           pushElement(that.objects, view, "View", true)
         })
+        debugger;
       }
       else{
         _.each(this.schema.enumerations, function(enumeration, i){
@@ -178,8 +179,45 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       })
 
     }
-    this.parse();
-    this.render();
+    this.injectDependencies = function(){
+      var that = this;
+      var dependencies = [];
+      _.each(this.schema.dependencies, function(v, i){
+        var key = v.split("/").reverse()[0];
+        if(that.opts[key] != null)
+          dependencies.push(that.opts[key]);
+      })
+
+      function readmultifiles(dependencies) {
+        var reader = new FileReader();
+        function readFile(index) {
+          if( index >= dependencies.length ){
+            that.parse();
+            that.render();
+            return;
+          }
+          var fileEntry = dependencies[index];
+          reader.onload = function(e) {  
+            var schema = JSON.parse(event.target.result);
+            var objects = _.union(that.schema.objects, schema.objects);
+            var views = _.union(that.schema.views, schema.views);
+            var mappers = _.union(that.schema.mappers, schema.mappers);
+            var enumerations = _.union(that.schema.enumerations, schema.enumerations);
+            that.schema.objects = objects;
+            that.schema.views = views;
+            that.schema.enumerations = enumerations;
+            that.schema.mappers = mappers;
+            readFile(index+1)
+          }
+          fileEntry.file(function(file){
+            reader.readAsText(file);
+          });
+        }
+        readFile(0);
+      }
+      readmultifiles(dependencies);
+    }
+    this.injectDependencies();
   }
 
   return p;

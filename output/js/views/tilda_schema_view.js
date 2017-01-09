@@ -11,7 +11,7 @@ define(['text!../templates/tilda_schema/_new.html',
   var promiseError = function(error, reject){
     console.error(error.message);
     console.error(error.stack);
-    reject(error)
+    reject(error);
   }
   var SCHEMA_REGEX = /\_tilda\.([A-Z][A-Za-z_0-9]+)\.json/i;
 
@@ -24,14 +24,14 @@ define(['text!../templates/tilda_schema/_new.html',
     var $select = viewScope.$el.find('select');
     viewScope.$el.find('.actions').hide();
     var f = new _FileSearch(entry, viewScope.excludeRegex, function(files){
-      console.log("Files ->");
-      console.log(files);
       $select.html('');
       $select.append('<option value=\'\'>--- select a schema ---</option');
-      viewScope.schemaEntries = files;
+
       for(i=0;i<files.length;i++){
         var file = files[i];
-        $select.append('<option value=\''+i+'\'>'+file.name+'</option')
+        viewScope.schemaEntries[file.name] = viewScope.schemaEntries[file.name] || {};
+        viewScope.schemaEntries[file.name] = file;
+        $select.append('<option value=\''+file.name+'\'>'+file.name+'</option');
       }
       viewScope.$el.find('.actions').show();
     })
@@ -40,7 +40,7 @@ define(['text!../templates/tilda_schema/_new.html',
     schemaName: null,
     currentEntry: null,
     packageInfo: null,
-    schemaEntries: [],
+    schemaEntries: {},
     excludeRegex: null,
     events: {
       'click button[name="schema-file"]': 'handleFileInput',
@@ -66,10 +66,10 @@ define(['text!../templates/tilda_schema/_new.html',
     },
     changeView: function(event){
       var that = this;
-      var index = parseInt($(event.target).val());
-      if(index == NaN)
+      var fName = $(event.target).val();
+      var schemaEntry = this.schemaEntries[fName];
+      if(schemaEntry == null)
         return;
-      var schemaEntry = this.schemaEntries[index];
       this.currentEntry = schemaEntry;
       var init = function(objectEntries){
         var pkgInfo = objectEntries.packageInfo;
@@ -83,8 +83,10 @@ define(['text!../templates/tilda_schema/_new.html',
             that.$el.find("#view_c").html("");
             that.$el.find("#view_c").show();
             that.$el.find("#obj_c").show();
-            that.schemaParser_object = new _Parser(_.clone(schema), "obj_c", {viewOnly: false});
-            that.schemaParser_view = new _Parser(_.clone(schema), "view_c", {viewOnly: true});
+            var opts = _.merge(that.schemaEntries, {viewOnly: false});
+            that.schemaParser_object = new _Parser(_.clone(schema), "obj_c", opts);
+            opts = _.merge(opts, {viewOnly: false})
+            that.schemaParser_view = new _Parser(_.clone(schema), "view_c", opts);
           }).catch(error);
         }).catch(error);
       }
@@ -100,7 +102,7 @@ define(['text!../templates/tilda_schema/_new.html',
           }
         };
         objects.schemaEntry = schemaEntry;
-        var readEntries = function(callback){
+        var nestedReadEntries = function(callback){
           dirReader.readEntries(function(results){
             callback(results)
           })
@@ -115,19 +117,19 @@ define(['text!../templates/tilda_schema/_new.html',
             }
           }
           if(results.length >= 90){
-            readEntries(callbackFn, function(error){console.error(error.message);});
+            nestedReadEntries(callbackFn, function(error){console.error(error.message);});
           } else {
             init(objects);
           }
         }
-        readEntries(callbackFn, function(error){console.error(error.message);});
+        nestedReadEntries(callbackFn, function(error){console.error(error.message);});
       };
       schemaEntry.getParent(function(dEntry){
         var dirReader = dEntry.createReader();
         readEntries(dirReader); // Start reading directory contents.
       }, function(error){
         console.error(error);
-      })      
+      })
     },
     togglePapers: function(){
       if($(event.target).val() == "object"){
