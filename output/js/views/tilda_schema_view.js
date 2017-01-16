@@ -1,6 +1,6 @@
 define(['text!../templates/tilda_schema/_new.html', 
-    "../core/parser", '../core/file_search'],
-  function(_NewView, _Parser, _FileSearch){
+    "../core/parser", '../core/file_search', '../core/read_schema'],
+  function(_NewView, _Parser, _FileSearch, _ReadSchema){
   var error = function(error){
     console.log(error.message);
     console.log(error.stack);
@@ -24,16 +24,17 @@ define(['text!../templates/tilda_schema/_new.html',
     var $select = viewScope.$el.find('select');
     viewScope.$el.find('.actions').hide();
     var f = new _FileSearch(entry, viewScope.excludeRegex, function(files){
-      $select.html('');
-      $select.append('<option value=\'\'>--- select a schema ---</option');
-
-      for(i=0;i<files.length;i++){
-        var file = files[i];
-        viewScope.schemaEntries[file.name] = viewScope.schemaEntries[file.name] || {};
-        viewScope.schemaEntries[file.name] = file;
-        $select.append('<option value=\''+file.name+'\'>'+file.name+'</option');
-      }
       viewScope.$el.find('.actions').show();
+      var rs = new _ReadSchema(files, function(){
+        $select.html('');
+        $select.append('<option value=\'\'>--- select a schema ---</option');
+        for(i=0;i<files.length;i++){
+          var file = files[i];
+          viewScope.schemaEntries[file.name] = viewScope.schemaEntries[file.name] || {};
+          viewScope.schemaEntries[file.name] = file;
+          $select.append('<option value=\''+file.name+'\'>'+file.name+'</option');
+        }
+      })
     })
   }
   var TildaSchemaView = Backbone.View.extend({
@@ -68,9 +69,6 @@ define(['text!../templates/tilda_schema/_new.html',
       var that = this;
       var fName = $(event.target).val();
       var schemaEntry = this.schemaEntries[fName];
-      if(schemaEntry == null)
-        return;
-      this.currentEntry = schemaEntry;
       var init = function(objectEntries){
         var pkgInfo = objectEntries.packageInfo;
         that.packageInfo = pkgInfo;
@@ -78,59 +76,30 @@ define(['text!../templates/tilda_schema/_new.html',
           window.tildaCache = cache;
           var schemaFname = "_tilda."+pkgInfo.schema.name+".json";
           that.$el.find(".fName").html("<h4>loaded <i>"+schemaFname+"</i></h4>")
-          that.schemaFrom(objectEntries.schemaEntry).then(function(schema){
-            that.$el.find("#obj_c").html("");
-            that.$el.find("#view_c").html("");
-            that.$el.find("#view_c").show();
-            that.$el.find("#obj_c").show();
-            var opts = _.merge(that.schemaEntries, {viewOnly: false});
-            that.schemaParser_object = new _Parser(_.clone(schema), "obj_c", opts);
-            opts = _.clone(opts);
-            opts.viewOnly = true;
-            that.schemaParser_view = new _Parser(_.clone(schema), "view_c", opts);
-          }).catch(error);
+          that.$el.find("#obj_c").html("");
+          that.$el.find("#view_c").html("");
+          that.$el.find("#view_c").show();
+          that.$el.find("#obj_c").show();
+
+          that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false});
+          that.schemaParser_view = new _Parser(schemaFname, "view_c", {viewOnly: true});
         }).catch(error);
       }
-      // Call the reader.readEntries() until no more results are returned.
-      var readEntries = function(dirReader) {
-        var fName = schemaEntry.name;
-        var match = SCHEMA_REGEX.exec(fName);
+      var schemaName = schemaEntry.name.split(".")[1];
+      var graphInfoName = "_tilda."+schemaName+".graphInfo.json"
+      var fullPath = schemaEntry.fullPath.replace(schemaEntry.name, graphInfoName)
+      schemaEntry.filesystem.root.getFile(fullPath, {create: true }, function(dEntry){
         var objects = {}
+        objects.cacheEntry = dEntry;
         objects.packageInfo = {
           "schema": {
-            "name": match[1],
-            "path": fName
+            "name": schemaName,
+            "path": schemaEntry.fullPath
           }
         };
-        objects.schemaEntry = schemaEntry;
-        var nestedReadEntries = function(callback){
-          dirReader.readEntries(function(results){
-            callback(results)
-          })
-        }
-        var callbackFn = function(results) {
-          for(i=0; i<results.length; i++){
-            var fName = results[i].name;
-            var name = objects.schemaEntry.name.split(".")[1];
-            if(fName == "_tilda."+name+".graphInfo.json"){
-              objects.cacheEntry = results[i];
-              break;
-            }
-          }
-          if(results.length >= 90){
-            nestedReadEntries(callbackFn, function(error){console.error(error.message);});
-          } else {
-            init(objects);
-          }
-        }
-        nestedReadEntries(callbackFn, function(error){console.error(error.message);});
-      };
-      schemaEntry.getParent(function(dEntry){
-        var dirReader = dEntry.createReader();
-        readEntries(dirReader); // Start reading directory contents.
-      }, function(error){
-        console.error(error);
-      })
+        init(objects);
+      }, error)
+
     },
     togglePapers: function(){
       if($(event.target).val() == "object"){
@@ -148,8 +117,6 @@ define(['text!../templates/tilda_schema/_new.html',
         chrome.storage.local.get("regex-f", function(value){
           if(value != null || value.length > 0){
             that.excludeRegex = new RegExp(value, "i");
-            console.log(value);
-            console.log(that.excludeRegex);
             that.$el.find('.regex-f').val(value);
           }
         });        
@@ -160,28 +127,6 @@ define(['text!../templates/tilda_schema/_new.html',
       that.$el.find('.actions').hide();
 
       return this;
-    },
-    schemaFrom: function(fileEntry){
-      var p = new Promise(function (resolve, reject) {
-        var readFile = function(_file){
-          var reader = new FileReader();
-          reader.onload = function(event) {
-            try{
-              var schema = JSON.parse(event.target.result);
-              resolve(schema)
-            } catch(e){
-              console.error("Error occured -> "+e.message);
-              console.error(e.stack);
-              reject(e);
-            }
-          };
-          reader.readAsText(_file);
-        }
-        fileEntry.file(function(file){
-          readFile(file);
-        })
-      })
-      return p;
     },
     initCache: function(fileEntry){
       var p = new Promise(function (resolve, reject) {

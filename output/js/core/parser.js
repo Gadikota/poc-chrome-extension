@@ -15,42 +15,22 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
   var CustomElementView = CEV.CustomElementView;
   var renderObject = Helpers.renderObject;
   var renderObjectRelations = LinkRenderer;
-  var p = function(schema, eleId, opts){
-    this.schema = schema
+  var p = function(package, eleId, opts){
+    this.package = package;
     this.opts = opts;
     this.eleId = eleId;
-    this.pKey = this.schema.package.toLowerCase()+"#"+this.opts.viewOnly;
+    this.pKey = package.toLowerCase()+"#"+this.opts.viewOnly;
     this.objects = new ObjectCollection();
     this.paper = null;
+    var schemaName = this.package.split(".")[1];
+    this.objects = new ObjectCollection(window.collection.where({schemaName: schemaName}));
+    if(this.opts.viewOnly){
+      this.objects = new ObjectCollection(this.objects.where({_type: "View"}));
+    }
+
     console.log("pKey --> "+this.pKey);
     var currentPos = { x: -150, y: 30 }
-    this.parse = function(){
-      var that = this;
-      var pushElement = function(collection, schemaObj, _type, _inSchema){
-        var t = new ParserElement();
-        t.set({data: schemaObj, name: schemaObj.name,
-         _type: _type, inSchema: _inSchema, package: that.schema.package, pKey: that.pKey});
-        collection.add(t);
-      }
-      _.each(this.schema.objects, function(object, i){
-        pushElement(that.objects, object, "Object", true)
-      })
-      if(this.opts.viewOnly){
-        _.each(this.schema.views, function(view, i){
-          pushElement(that.objects, view, "View", true)
-        })
-      }
-      else{
-        _.each(this.schema.enumerations, function(enumeration, i){
-          pushElement(that.objects, enumeration, "Enumeration", true)
-        })
 
-        _.each(this.schema.mappers, function (mapper, i){
-          pushElement(that.objects, mapper, "Mapper", true)
-        })
-
-      }
-    }
     this.resetAll = function(){
       var elements = this.paper.model.getElements();
       var links = this.paper.model.getLinks();
@@ -68,16 +48,13 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       var that = this;
 
       var elementChangeHandler = function(event){
-        var eventObject = that.objects.findWhere({graphId: event.get("id")});
-        var key = that.schema.package.toLowerCase()+"#"+eventObject.get("name").toLowerCase();
+        var eventObject = that.objects.findWhere({graphId: event.get("graphId")});
+        var key = that.pKey+"#"+eventObject.get("friendlyName");
         var position = eventObject.get("data").position;
         if(eventObject.get("data").position == null){
           eventObject.get("data").position = {};
           var position = eventObject.get("data").position;
         }
-        // Store preferences.
-        var syncSet = {};
-        // console.log("key -> "+key+"\nObject -> "+JSON.stringify(event.toJSON()));
         window.tildaCache[key] = event.toJSON();
       }
 
@@ -119,104 +96,55 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         }
       });
 
-      paper.$el.on('mousewheel DOMMouseScroll', function onMouseWheel(e) {
-        //function onMouseWheel(e){
-        e.preventDefault();
-        e = e.originalEvent;
-        var V = joint.V;
-        var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))) / 50;
-        var offsetX = (e.offsetX || e.clientX - $(this).offset().left);
+      // paper.$el.on('mousewheel DOMMouseScroll', function onMouseWheel(e) {
+      //   //function onMouseWheel(e){
+      //   e.preventDefault();
+      //   e = e.originalEvent;
+      //   var V = joint.V;
+      //   var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))) / 50;
+      //   var offsetX = (e.offsetX || e.clientX - $(this).offset().left);
 
-        var offsetY = (e.offsetY || e.clientY - $(this).offset().top);
-        var p = offsetToLocalPoint(paper, offsetX, offsetY);
-        var newScale = V(paper.viewport).scale().sx + delta;
-        // console.log(' delta' + delta + ' ' + 'offsetX' + offsetX + 'offsety--' + offsetY + 'p' + p.x + 'newScale' + newScale)
-        if (newScale > 0.4 && newScale < 2) {
-          paper.setOrigin(0, 0);
-          paper.scale(newScale, newScale, p.x, p.y);
-        }
-      });
+      //   var offsetY = (e.offsetY || e.clientY - $(this).offset().top);
+      //   var p = offsetToLocalPoint(paper, offsetX, offsetY);
+      //   var newScale = V(paper.viewport).scale().sx + delta;
+      //   // console.log(' delta' + delta + ' ' + 'offsetX' + offsetX + 'offsety--' + offsetY + 'p' + p.x + 'newScale' + newScale)
+      //   if (newScale > 0.4 && newScale < 2) {
+      //     paper.setOrigin(0, 0);
+      //     paper.scale(newScale, newScale, p.x, p.y);
+      //   }
+      // });
 
-      var that = this;
-      var elementChangeHandler = function(event){
-        var eventObject = that.objects.findWhere({graphId: event.get("id")});
-        var key = eventObject.get("pKey")+"#"+eventObject.get("name").toLowerCase();
-        var position = eventObject.get("data").position;
-        if(eventObject.get("data").position == null){
-          eventObject.get("data").position = {};
-          var position = eventObject.get("data").position;
-        }
-        // Store preferences.
-        window.tildaCache[key] = event.toJSON();
-      }
-      var objects = this.objects
-      if(this.opts.viewOnly){
-        objects = new ObjectCollection(objects.where({_type: "View"}));
-      }
 
-      _.each(objects, function(object, i){
-        var object = objects.at(i);
-        var key = object.get("pKey")+"#"+object.get("name").toLowerCase();
+      _.each(this.objects, function(object, i){
+        var object = that.objects.at(i);
+        var key = that.package+object.get("friendlyName");
         var objFn = renderObject[object.get("_type")]
         if ( objFn != null){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
-          var t = objFn(graph, object, position, objectAttr);
+          var t = objFn(graph, object, position, objectAttr, package);
           object.set("graphId", t.get("id"));
           object.set("rendered", true);
           t.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
         }
       })
 
-      _.each(objects, function(object, i){
-        var object = objects.at(i);
-        var key = that.opts.viewOnly ? "only"+object.get("_type") : object.get("_type")
-        var objFn = renderObjectRelations[key]
-        if(objFn != null){
-          objFn(graph, object, that.objects, gotoNextPosition(currentPos));
-        }
-      })
+      // _.each(objects, function(object, i){
+      //   var object = objects.at(i);
+      //   var key = that.opts.viewOnly ? "only"+object.get("_type") : object.get("_type")
+      //   var objFn = renderObjectRelations[key]
+      //   if(objFn != null){
+      //     objFn(graph, object, that.objects, gotoNextPosition(currentPos));
+      //   }
+      // })
 
     }
-    this.injectDependencies = function(){
-      var that = this;
-      var dependencies = [];
-      _.each(this.schema.dependencies, function(v, i){
-        var key = v.split("/").reverse()[0];
-        if(that.opts[key] != null)
-          dependencies.push(that.opts[key]);
-      })
-
-      function readmultifiles(dependencies) {
-        var reader = new FileReader();
-        function readFile(index) {
-          if( index >= dependencies.length ){
-            that.parse();
-            that.render();
-            return;
-          }
-          var fileEntry = dependencies[index];
-          reader.onload = function(e) {  
-            var schema = JSON.parse(event.target.result);
-            var objects = _.union(that.schema.objects, schema.objects);
-            var views = _.union(that.schema.views, schema.views);
-            var mappers = _.union(that.schema.mappers, schema.mappers);
-            var enumerations = _.union(that.schema.enumerations, schema.enumerations);
-            that.schema.objects = objects;
-            that.schema.views = views;
-            that.schema.enumerations = enumerations;
-            that.schema.mappers = mappers;
-            readFile(index+1)
-          }
-          fileEntry.file(function(file){
-            reader.readAsText(file);
-          });
-        }
-        readFile(0);
-      }
-      readmultifiles(dependencies);
+    try{
+      this.render();
+    } catch(e){
+      console.error(e.message);
+      console.error(e.stack)
     }
-    this.injectDependencies();
   }
 
   return p;
