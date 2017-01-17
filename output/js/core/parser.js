@@ -134,14 +134,14 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         }
       })
 
-      // _.each(objects, function(object, i){
-      //   var object = objects.at(i);
-      //   var key = that.opts.viewOnly ? "only"+object.get("_type") : object.get("_type")
-      //   var objFn = renderObjectRelations[key]
-      //   if(objFn != null){
-      //     objFn(graph, object, that.objects, gotoNextPosition(currentPos));
-      //   }
-      // })
+      _.each(this.objects, function(object, i){
+        var object = that.objects.at(i);
+        var key = object.get("_type");
+        var objFn = renderObjectRelations[key]
+        if(objFn != null){
+          objFn(graph, object, that.pKey);
+        }
+      })
 
     }
     try{
