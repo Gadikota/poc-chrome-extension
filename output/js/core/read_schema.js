@@ -60,7 +60,7 @@ function(ParserElement, Collection){
         var schema = JSON.parse(event.target.result);
         pushElement(package, schema.objects, "Object")
         pushElement(package, schema.mappers, "Mapper")
-        pushElement(package, schema.enumerations, "Enumberation")
+        pushElement(package, schema.enumerations, "Enumeration")
         pushElement(package, schema.views, "View")
 
         readFile(index+1);

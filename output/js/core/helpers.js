@@ -8,179 +8,147 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
     }
     return currentPos;
   }
-
-  var renderObject = {
-    "View": function(graph, object, position, objectAttr, package){
-      if(objectAttr == null){
-        var name = object.get("schemaName")+"."+object.get("name");
-        objectAttr = {
-          position: gotoNextPosition(position),
+  var X = {};
+  var renderView = function(graph, object, position, objectAttr, package){
+    var renderFn = function(g, o, p, attr, pkg){
+      if(attr == null){
+        var name = o.get("schemaName")+"."+o.get("name");
+        attr = {
+          position: position,
           size: { width: name.length*12, height: 30 },
           attrs: { 
             rect: { fill: 'rgb(169,209,142)', stroke: "rgb(0,176,80)", "stroke-width": 1, "stroke-dasharray": "3,3" },
             text: { text: name, fill: 'black'} 
-          } 
-        }
-      }
-
-      var t = new joint.shapes.basic.Rect(objectAttr);
-      graph.addCell(t);
-      object.set({graphId: t.id, rendered: true})
-
-      // dependencies;
-      var references = object.get("references") || [];
-      _.each(references, function(value, i){
-        var key = package+value.get("friendlyName");
-        objectAttr = window.tildaCache[key];
-        if(objectAttr == null){
-          var refName = value.get("schemaName")+"."+value.get("name");
-          objectAttr = {
-            position: gotoNextPosition(position),
-            size: { width: refName.length*12, height: 30 },
-            attrs: { 
-              rect: { fill: 'rgb(169,209,142)', stroke: "rgb(0,176,80)", "stroke-width": 1, "stroke-dasharray": "3,3" },
-              text: { text: refName, fill: 'black'}
-            } 
           }
         }
-        if(value.get('rendered') == null){ 
-          var t = new joint.shapes.basic.Rect(objectAttr);
-          graph.addCell(t);
-          value.set({graphId: t.id, rendered: true})
-        }
-      })
+      }
+      if(o.get('graphId') == null){
+        var t = new joint.shapes.basic.Rect(attr);
+        g.addCell(t);
+        o.set({graphId: t.id, rendered: true})
+      }
       return t;
-    },
-    "Object": function(graph, object, position, objectAttr, package){
-      if(objectAttr == null){
+    }
+    var a = renderFn.apply(this, arguments);
+    // dependencies;
+    console.log("Deps --> "+object.get("name"));
+    var references = object.get("references") || [];
+    _.each(references, function(value, i){
+      var key = package+"."+value.get("friendlyName");
+      console.log("Key --> "+key);
+      objectAttr = window.tildaCache[key];
+      var fn = X[value.get("_type")];
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+    })
+    return a;
+  }
+  var renderObject = function(graph, object, position, objectAttr, package){
+    var renderFn = function(g, o, p, attr, pkg){
+      if(attr == null){
         // , "stroke-dasharray": "3,3"  },
-        var name = object.get("schemaName")+"."+object.get("name");
-        objectAttr = {
-          position: position,
+        var name = o.get("schemaName")+"."+o.get("name");
+        console.log("Name --> Object "+name);
+        attr = {
+          position: p,
           size: { width: name.length*12, height: 30 },
           attrs: {
-            id: object.get("friendlyName"),
+            id: o.get("friendlyName"),
             rect: { fill: 'rgb(46,117,182)', stroke: "rgb(65,113,156)", "stroke-width": 2 },
             text: { text: name, fill: 'white'}
           } 
         }
       }
-      console.log("Name -> "+name);
-      var t = new joint.shapes.basic.Rect(objectAttr);
-      graph.addCell(t);
-      t.set({graphId: t.id, rendered: true})
-      // dependencies;
-      var references = object.get("references") || [];
-      _.each(references, function(value, i){
-        var key = package+value.get("friendlyName");
-        objectAttr = window.tildaCache[key];
-        var refName = value.get("schemaName")+"."+value.get("name");
-        console.log("refName -> "+refName);
-        if(objectAttr == null){
-          objectAttr = {
-            position: gotoNextPosition(position),
-            size: { width: refName.length*12, height: 30 },
-            attrs: {
-              id: value.get("friendlyName"),
-              rect: { fill: 'rgb(46,117,182)', stroke: "rgb(65,113,156)", "stroke-width": 2 },
-              text: { text: refName, fill: 'white'}
-            } 
-          }
-        }
-        if(value.get('rendered') == null){
-          var t1 = new joint.shapes.basic.Rect(objectAttr);
-          graph.addCell(t1);
-          value.set({graphId: t1.id, rendered: true})
-        }
-      })
+      if(o.get('graphId') == null){
+        var t = new joint.shapes.basic.Rect(attr);
+        g.addCell(t);
+        o.set({graphId: t.id, rendered: true})
+      }
       return t;
-    },
-    "Enumeration": function(graph, object, position, objectAttr, package){
-      var name = object.get("schemaName")+"."+object.get("name");
-      if(objectAttr == null){
-        objectAttr = {
+    }
+    var a = renderFn.apply(this, arguments);
+
+    var references = object.get("references") || [];
+    _.each(references, function(value, i){
+      var key = package+"."+value.get("friendlyName");
+      objectAttr = window.tildaCache[key];
+      var fn = X[value.get("_type")];
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+    })
+    return a;
+  }
+  var renderEnumeration = function(graph, object, position, objectAttr, package){
+    var renderFn = function(g, o, p, attr, pkg){
+      if(attr == null){
+        var name = o.get("schemaName")+"."+o.get("name");
+        attr = {
           position: position,
           size: { width: name.length*12, height: 30 },
           attrs: { 
-            id: object.get("friendlyName"),
+            id: o.get("friendlyName"),
             rect: { fill: 'rgb(251,229,214)', stroke: "rgb(248,203,173)", "stroke-width": 1  },
             text: { text: name, fill: 'black'} 
           } 
         }
 
       }
-      var t = new joint.shapes.basic.Rect(objectAttr);
-      graph.addCell(t);
-      t.set({graphId: t.id, rendered: true})
-      // dependencies;
-      var references = object.get("references") || [];
-      _.each(references, function(value, i){
-        var key = package+value.get("friendlyName");
-        objectAttr = window.tildaCache[key];
-        var refName = value.get("schemaName")+"."+value.get("name");
-        console.log("refName -> "+refName);
-        if(objectAttr == null){
-          objectAttr = {
-            position: gotoNextPosition(position),
-            size: { width: refName.length*12, height: 30 },
-            attrs: {
-              id: value.get("friendlyName"),
-              rect: { fill: 'rgb(251,229,214)', stroke: "rgb(248,203,173)", "stroke-width": 1  },
-              text: { text: refName, fill: 'black'}
-            } 
-          }
-        }
-        if(value.get('rendered') == null){
-          var t1 = new joint.shapes.basic.Rect(objectAttr);
-          graph.addCell(t1);
-          value.set({graphId: t1.id, rendered: true})
-        }
-      })
-      return t;
+      if(object.get('rendered') == null){
+        var t = new joint.shapes.basic.Rect(attr);
+        graph.addCell(t);
+        o.set({graphId: t.id, rendered: true})
+        return t;
+      }
+    }
+    var a = renderFn.apply(this, arguments);
 
-    },
-    "Mapper": function(graph, object, position, objectAttr, package){
-      if(objectAttr == null){
-        var name = object.get("schemaName")+"."+object.get("name");
-        objectAttr = {
+    var references = object.get("references") || [];
+    _.each(references, function(value, i){
+      var key = package+"."+value.get("friendlyName");
+      objectAttr = window.tildaCache[key];
+      var fn = X[value.get("_type")];
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+    })
+    return a;
+
+  }
+  var renderMapper = function(graph, object, position, objectAttr, package){
+    var renderFn = function(g, o, p, attr, pkg){
+
+      if(attr == null){
+        var name = o.get("schemaName")+"."+o.get("name");
+        attr = {
           position: position,
           size: { width: name.length*12, height: 30 },
           attrs: { 
-            id: object.get("friendlyName"),
+            id: o.get("friendlyName"),
             rect: { fill: 'rgb(248,203,173)', stroke: "rgb(244,177,131)", "stroke-width": 2  },
             text: { text: name, fill: 'black'} 
           } 
         }           
       }
-      var t = new joint.shapes.basic.Rect(objectAttr);
-      graph.addCell(t);
-      // dependencies;
-      var references = object.get("references") || [];
-      _.each(references, function(value, i){
-        var key = package+value.get("friendlyName");
-        objectAttr = window.tildaCache[key];
-        var refName = value.get("schemaName")+"."+value.get("name");
-        console.log("refName -> "+refName);
-        if(objectAttr == null){
-          objectAttr = {
-            position: gotoNextPosition(position),
-            size: { width: refName.length*12, height: 30 },
-            attrs: {
-              id: value.get("friendlyName"),
-              rect: { fill: 'rgb(248,203,173)', stroke: "rgb(244,177,131)", "stroke-width": 2  },
-              text: { text: refName, fill: 'black'}
-            } 
-          }
-        }
-        if(value.get('rendered') == null){
-          var t1 = new joint.shapes.basic.Rect(objectAttr);
-          graph.addCell(t1);
-          value.set({graphId: t1.id, rendered: true})
-        }
-      })
-
-      return t;
+      if(o.get('graphId') == null){
+        var t = new joint.shapes.basic.Rect(attr);
+        graph.addCell(t);
+        o.set({graphId: t.id, rendered: true})
+        return t;
+      }
     }
+    var a = renderFn.apply(this, arguments);
+
+    // dependencies;
+    var references = object.get("references") || [];
+    _.each(references, function(value, i){
+      var key = package+"."+value.get("friendlyName");
+      objectAttr = window.tildaCache[key];
+      var fn = X[value.get("_type")];
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+    })
+    return a;
+  }
+  X = {
+    "View": renderView,
+    "Object": renderObject,
+    "Enumeration": renderEnumeration,
+    "Mapper": renderMapper
   };
-  return { renderObject: renderObject };
+  return { renderObject: X };
 })

@@ -19,14 +19,20 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.package = package;
     this.opts = opts;
     this.eleId = eleId;
-    this.pKey = package.toLowerCase()+"#"+this.opts.viewOnly;
     this.objects = new ObjectCollection();
     this.paper = null;
-    var schemaName = this.package.split(".")[1];
-    this.objects = new ObjectCollection(window.collection.where({schemaName: schemaName}));
+    this.collection = window.collection.clone();
+    this.schemaName = this.package.split(".")[1];
+    var that = this;
     if(this.opts.viewOnly){
-      this.objects = new ObjectCollection(this.objects.where({_type: "View"}));
+      this.objects = new ObjectCollection(this.collection.where({_type: "View", schemaName: this.schemaName}));
+    } else {
+      var objects = this.collection.filter(function (obj) {
+        return obj.get('_type') !== 'View' && obj.get('schemaName') == that.schemaName;
+      });
+      this.objects = new ObjectCollection(objects);
     }
+    this.pKey = this.schemaName+"#"+this.opts.viewOnly;
 
     console.log("pKey --> "+this.pKey);
     var currentPos = { x: -150, y: 30 }
@@ -96,36 +102,35 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         }
       });
 
-      // paper.$el.on('mousewheel DOMMouseScroll', function onMouseWheel(e) {
-      //   //function onMouseWheel(e){
-      //   e.preventDefault();
-      //   e = e.originalEvent;
-      //   var V = joint.V;
-      //   var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))) / 50;
-      //   var offsetX = (e.offsetX || e.clientX - $(this).offset().left);
+      paper.$el.on('mousewheel DOMMouseScroll', function onMouseWheel(e) {
+        //function onMouseWheel(e){
+        e.preventDefault();
+        e = e.originalEvent;
+        var V = joint.V;
+        var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))) / 50;
+        var offsetX = (e.offsetX || e.clientX - $(this).offset().left);
 
-      //   var offsetY = (e.offsetY || e.clientY - $(this).offset().top);
-      //   var p = offsetToLocalPoint(paper, offsetX, offsetY);
-      //   var newScale = V(paper.viewport).scale().sx + delta;
-      //   // console.log(' delta' + delta + ' ' + 'offsetX' + offsetX + 'offsety--' + offsetY + 'p' + p.x + 'newScale' + newScale)
-      //   if (newScale > 0.4 && newScale < 2) {
-      //     paper.setOrigin(0, 0);
-      //     paper.scale(newScale, newScale, p.x, p.y);
-      //   }
-      // });
-
+        var offsetY = (e.offsetY || e.clientY - $(this).offset().top);
+        var p = offsetToLocalPoint(paper, offsetX, offsetY);
+        var newScale = V(paper.viewport).scale().sx + delta;
+        // console.log(' delta' + delta + ' ' + 'offsetX' + offsetX + 'offsety--' + offsetY + 'p' + p.x + 'newScale' + newScale)
+        if (newScale > 0.4 && newScale < 2) {
+          paper.setOrigin(0, 0);
+          paper.scale(newScale, newScale, p.x, p.y);
+        }
+      });
 
       _.each(this.objects, function(object, i){
         var object = that.objects.at(i);
-        var key = that.package+object.get("friendlyName");
+        var key = that.schemaName+object.get("friendlyName");
         var objFn = renderObject[object.get("_type")]
         if ( objFn != null){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
-          var t = objFn(graph, object, position, objectAttr, package);
-          object.set("graphId", t.get("id"));
-          object.set("rendered", true);
-          t.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
+          var t = objFn(graph, object, position, objectAttr, that.schemaName+"#"+that.opts.viewOnly);
+          if(t != null){
+            t.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
+          }
         }
       })
 
