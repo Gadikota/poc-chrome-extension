@@ -54,7 +54,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       var that = this;
 
       var elementChangeHandler = function(event){
-        var eventObject = that.objects.findWhere({graphId: event.get("graphId")});
+        var eventObject = that.collection.findWhere({graphId: event.get("graphId")})
         var key = that.pKey+"#"+eventObject.get("friendlyName");
         var position = eventObject.get("data").position;
         if(eventObject.get("data").position == null){
@@ -86,7 +86,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         linkView: CustomLinkView
       });
       this.paper = paper;
-
+      window.paper = paper;
 
       var dragStartPosition = null;
       paper.on('blank:pointerdown',function(event, x, y) {

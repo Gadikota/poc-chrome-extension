@@ -71,9 +71,6 @@ define(["jointjs", "lodash", "jquery",
   var X = {};
   var objRel = function(graph, object, pKey){
     var rels = object.get('references') || [];
-    if(object.get("_type") == "View"){
-      debugger;
-    }
     _.each(rels, function(target){
       renderLink(graph, object, target, pKey)
       objRel.apply(this, [graph, target, pKey]);
