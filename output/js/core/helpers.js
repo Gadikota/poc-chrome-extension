@@ -70,6 +70,8 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"."+value.get("friendlyName");
+      console.log("Key --> "+key);
+      console.log("Type --> "+value.get("_type"));
       objectAttr = window.tildaCache[key];
       var fn = X[value.get("_type")];
       fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])

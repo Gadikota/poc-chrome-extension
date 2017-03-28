@@ -2,7 +2,7 @@ define(["jointjs", "lodash", "jquery",
  "./parser_element", "./helpers"],
  function(joint, _, $, ParserElement, Helpers){
   var renderObject = Helpers.renderObject;
-
+  var renderedLinks = [];
   var renderLink = function(graph, source, target, pKey){
     var key = pKey+"#"+source.get("friendlyName")+"#"+target.get("friendlyName");
     var linkAttrs = window.tildaCache[key];
@@ -53,19 +53,27 @@ define(["jointjs", "lodash", "jquery",
         target: { id: target.get("graphId") }
       })
     }
-    var vertices = linkAttrs.vertices;
-    var link = new joint.dia.Link(linkAttrs);
-    var eventHandler = function(event){
-      var key = event.get("attrs").key.toLowerCase();
-      var syncSet = {}
-      var attributes = event.attributes;
-      window.tildaCache[key] = _.merge(attributes, { vertices: this.get('vertices') })
+    var hoorah = _.filter(renderedLinks, function(ele){
+      return ele.source.id == linkAttrs.source.id && ele.target.id == linkAttrs.target.id
+    })
+    console.log("hoorah --> "+JSON.stringify(hoorah));
+    console.log("linkAttrs --> "+JSON.stringify(linkAttrs));
+    if(hoorah.length == 0){
+      var vertices = linkAttrs.vertices;
+      var link = new joint.dia.Link(linkAttrs);
+      var eventHandler = function(event){
+        var key = event.get("attrs").key.toLowerCase();
+        var syncSet = {}
+        var attributes = event.attributes;
+        window.tildaCache[key] = _.merge(attributes, { vertices: this.get('vertices') })
+      }
+      if(vertices){
+        link.set('vertices', vertices);
+      }
+      link.on("change:vertices", _.debounce(eventHandler, 500, { 'maxWait' : 1000 }));
+      graph.addCell(link);
+      renderedLinks.push(linkAttrs); 
     }
-    if(vertices){
-      link.set('vertices', vertices);
-    }
-    link.on("change:vertices", _.debounce(eventHandler, 500, { 'maxWait' : 1000 }));
-    graph.addCell(link);
   }
 
   var X = {};

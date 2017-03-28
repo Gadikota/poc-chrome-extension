@@ -119,11 +119,10 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           paper.scale(newScale, newScale, p.x, p.y);
         }
       });
-
       _.each(this.objects, function(object, i){
         var object = that.objects.at(i);
         var key = that.schemaName+object.get("friendlyName");
-        var objFn = renderObject[object.get("_type")]
+        var objFn = renderObject[object.get("_type")];
         if ( objFn != null){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
