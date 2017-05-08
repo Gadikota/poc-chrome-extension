@@ -77,12 +77,7 @@ define(['text!../templates/tilda_schema/_new.html',
           var schemaFname = "_tilda."+pkgInfo.schema.name+".json";
           that.$el.find(".fName").html("<h4>loaded <i>"+schemaFname+"</i></h4>")
           that.$el.find("#obj_c").html("");
-          that.$el.find("#view_c").html("");
-          that.$el.find("#view_c").show();
-          that.$el.find("#obj_c").show();
-
           that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false});
-          that.schemaParser_view = new _Parser(schemaFname, "view_c", {viewOnly: true});
         }).catch(error);
       }
       var schemaName = schemaEntry.name.split(".")[1];
@@ -102,16 +97,17 @@ define(['text!../templates/tilda_schema/_new.html',
 
     },
     togglePapers: function(){
+      var schemaFname = $('select').val();
+      this.$el.find("#obj_c").html("");
       if($(event.target).val() == "object"){
-        this.$el.find("#view_c").hide(); // hide for now.
-        this.$el.find("#obj_c").show();
+          this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false});
       } else{
-        this.$el.find("#obj_c").hide(); // hide for now.
-        this.$el.find("#view_c").show();
+          this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: true});
       }
     },
     render: function(){
       var that = this;
+
       that.$el.html(_NewView);
       if(chrome.storage){
         chrome.storage.local.get("regex-f", function(value){

@@ -44,9 +44,9 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
   }
   var renderObject = function(graph, object, position, objectAttr, package){
     var renderFn = function(g, o, p, attr, pkg){
+      var name = o.get("schemaName")+"."+o.get("name");
       if(attr == null){
         // , "stroke-dasharray": "3,3"  },
-        var name = o.get("schemaName")+"."+o.get("name");
         console.log("Name --> Object "+name);
         attr = {
           position: p,
@@ -58,10 +58,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           } 
         }
       }
+
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.Rect(attr);
         g.addCell(t);
-        o.set({graphId: t.id, rendered: true})
+        o.set({graphId: t.id, rendered: true, package: package})
       }
       return t;
     }

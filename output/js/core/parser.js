@@ -24,6 +24,11 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.collection = window.collection.clone();
     this.schemaName = this.package.split(".")[1];
     var that = this;
+    // reset object positions.
+    _.each(this.collection, function(object, i){
+      var object = that.collection.at(i);
+      object.set({"graphId": null});
+    })
     if(this.opts.viewOnly){
       this.objects = new ObjectCollection(this.collection.where({_type: "View", schemaName: this.schemaName}));
     } else {
@@ -119,6 +124,8 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           paper.scale(newScale, newScale, p.x, p.y);
         }
       });
+      console.error("Package --> "+that.package+"#"+that.opts.viewOnly);
+
       _.each(this.objects, function(object, i){
         var object = that.objects.at(i);
         var key = that.schemaName+object.get("friendlyName");
@@ -126,7 +133,8 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         if ( objFn != null){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
-          var t = objFn(graph, object, position, objectAttr, that.schemaName+"#"+that.opts.viewOnly);
+
+          var t = objFn(graph, object, position, objectAttr, that.package+"#"+that.opts.viewOnly);
           if(t != null){
             t.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
           }
