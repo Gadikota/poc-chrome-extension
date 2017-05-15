@@ -105,14 +105,22 @@ define(['text!../templates/tilda_schema/_new.html',
       }, error)
 
     },
-    togglePapers: function(){
+    togglePapers: function(event){
       var schemaFname = $('select').val();
       this.$el.find("#obj_c").html("");
-      if($(event.target).val() == "object"){
-          this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false});
-      } else{
-          this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: true});
+      var schemaEntry = this.schemaEntries[schemaFname];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var schema = JSON.parse(e.target.result);
+        if($(event.target).val() == "object"){
+            this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false, package: schema.package});
+        } else{
+            this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: true, package: schema.package});
+        }
       }
+      schemaEntry.file(function(schemaEntryF){
+        reader.readAsText(schemaEntryF);
+      });
     },
     render: function(){
       var that = this;
