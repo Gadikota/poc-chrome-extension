@@ -133,8 +133,8 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         if ( objFn != null){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
-
-          var t = objFn(graph, object, position, objectAttr, key, elementChangeHandler);
+          console.log(objectAttr);
+          var t = objFn(graph, object, position, objectAttr, that.pKey, elementChangeHandler);
         }
       })
 

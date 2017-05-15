@@ -35,7 +35,6 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
-      console.log("Key --> "+key);
       objectAttr = window.tildaCache[key];
       var fn = X[value.get("_type")];
       fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package, elementChangeHandler])
@@ -47,7 +46,6 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       var name = o.get("schemaName")+"."+o.get("name");
       if(attr == null){
         // , "stroke-dasharray": "3,3"  },
-        console.log("Name --> Object "+name);
         attr = {
           position: p,
           size: { width: name.length*12, height: 30 },
@@ -73,8 +71,8 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
-      console.log("Key --> "+key);
-      console.log("Type --> "+value.get("_type"));
+      console.log(key);
+      console.log(package);
       objectAttr = window.tildaCache[key];
       var fn = X[value.get("_type")];
       fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package, elementChangeHandler])
@@ -96,7 +94,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         }
 
       }
-      if(object.get('rendered') == null){
+      if(object.get('graphId') == null){
         var t = new joint.shapes.basic.Rect(attr);
         graph.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
