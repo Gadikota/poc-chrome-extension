@@ -23,6 +23,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.paper = null;
     this.collection = window.collection.clone();
     this.schemaName = this.package.split(".")[1];
+    this.pKey = opts.package+"#"+this.opts.viewOnly;
     var that = this;
     // reset object positions.
     _.each(this.collection, function(object, i){
@@ -37,7 +38,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       });
       this.objects = new ObjectCollection(objects);
     }
-    this.pKey = this.schemaName+"#"+this.opts.viewOnly;
 
     console.log("pKey --> "+this.pKey);
     var currentPos = { x: -150, y: 30 }

@@ -78,7 +78,15 @@ define(['text!../templates/tilda_schema/_new.html',
           var schemaFname = "_tilda."+pkgInfo.schema.name+".json";
           that.$el.find(".fName").html("<h4>loaded <i>"+schemaFname+"</i></h4>")
           that.$el.find("#obj_c").html("");
-          that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false});
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var schema = JSON.parse(e.target.result);
+            that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false, package: schema.package});
+          }
+          schemaEntry.file(function(schemaEntryF){
+            reader.readAsText(schemaEntryF);
+          });
+
         }).catch(error);
       }
       var schemaName = schemaEntry.name.split(".")[1];
