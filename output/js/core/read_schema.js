@@ -55,8 +55,6 @@ function(ParserElement, Collection){
       var fileEntry = fileEntries[index];
       reader.onload = function(e) {
         var package = fileEntry.name; 
-        console.log("Index --> "+index);
-        console.log("Package --> "+package);
         var schema = JSON.parse(event.target.result);
         pushElement(package, schema.objects, "Object")
         pushElement(package, schema.mappers, "Mapper")
@@ -81,7 +79,6 @@ function(ParserElement, Collection){
       this.collection = collection; // need to remove
       collection.each(function(element){
         var references = element.get('references');
-        console.log(JSON.stringify(element.attributes));
         var refObjs = [];
         if( references != null && references.length > 0){
           _.each(references, function(ref, i){

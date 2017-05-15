@@ -78,6 +78,19 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       }
 
       var graph = new joint.dia.Graph;
+      var graph_1 = new joint.dia.Graph;
+
+      var paper_1 = new joint.dia.Paper({
+        el: $("#robj"),
+        width: $('#robj').width(),
+        height: (window.screen.availHeight),
+        model: graph_1,
+        gridSize: 1,
+        restrictTranslate: true,
+        elementView: CustomElementView,
+        linkView: CustomLinkView
+      });
+
       var paper = new joint.dia.Paper({
         el: $("#"+this.eleId),
         width: window.screen.availWidth,
@@ -122,15 +135,19 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           paper.scale(newScale, newScale, p.x, p.y);
         }
       });
-
+      var x = 0;
+      var y = 20;
       _.each(this.objects, function(object, i){
         var object = that.objects.at(i);
+        var object_1 = that.objects.at(i).clone();
         var key = that.pKey+"#"+object.get("friendlyName");
         var objFn = renderObject[object.get("_type")];
         if ( objFn != null){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
           var t = objFn(graph, object, position, objectAttr, that.pKey, elementChangeHandler);
+          objFn(graph_1, object_1, {'x': x, 'y': y}, undefined, that.pKey, elementChangeHandler);
+          y = y+40;
         }
       })
 
