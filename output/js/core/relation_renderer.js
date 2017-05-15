@@ -13,7 +13,7 @@ define(["jointjs", "lodash", "jquery",
       }
       var attrs = {
         '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' },
-        'key': pKey+"#"+source.get("name")+"#"+target.get("name")
+        'key': pKey+"#"+source.get("friendlyName")+"#"+target.get("friendlyName")
       }
       if(source.get('_type') == "Object"){
         if(target.get("schemaName") != source.get("schemaName")){
@@ -56,8 +56,6 @@ define(["jointjs", "lodash", "jquery",
     var hoorah = _.filter(renderedLinks, function(ele){
       return ele.source.id == linkAttrs.source.id && ele.target.id == linkAttrs.target.id
     })
-    console.log("hoorah --> "+JSON.stringify(hoorah));
-    console.log("linkAttrs --> "+JSON.stringify(linkAttrs));
     if(hoorah.length == 0){
       var vertices = linkAttrs.vertices;
       var link = new joint.dia.Link(linkAttrs);

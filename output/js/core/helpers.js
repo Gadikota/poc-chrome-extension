@@ -9,7 +9,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
     return currentPos;
   }
   var X = {};
-  var renderView = function(graph, object, position, objectAttr, package){
+  var renderView = function(graph, object, position, objectAttr, package, elementChangeHandler){
     var renderFn = function(g, o, p, attr, pkg){
       if(attr == null){
         var name = o.get("schemaName")+"."+o.get("name");
@@ -30,19 +30,19 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       return t;
     }
     var a = renderFn.apply(this, arguments);
-    // dependencies;
-    console.log("Deps --> "+object.get("name"));
+    if(a)
+      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
       console.log("Key --> "+key);
       objectAttr = window.tildaCache[key];
       var fn = X[value.get("_type")];
-      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package, elementChangeHandler])
     })
     return a;
   }
-  var renderObject = function(graph, object, position, objectAttr, package){
+  var renderObject = function(graph, object, position, objectAttr, package, elementChangeHandler){
     var renderFn = function(g, o, p, attr, pkg){
       var name = o.get("schemaName")+"."+o.get("name");
       if(attr == null){
@@ -67,6 +67,8 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       return t;
     }
     var a = renderFn.apply(this, arguments);
+    if(a)
+      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
 
     var references = object.get("references") || [];
     _.each(references, function(value, i){
@@ -75,11 +77,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       console.log("Type --> "+value.get("_type"));
       objectAttr = window.tildaCache[key];
       var fn = X[value.get("_type")];
-      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package, elementChangeHandler])
     })
     return a;
   }
-  var renderEnumeration = function(graph, object, position, objectAttr, package){
+  var renderEnumeration = function(graph, object, position, objectAttr, package, elementChangeHandler){
     var renderFn = function(g, o, p, attr, pkg){
       if(attr == null){
         var name = o.get("schemaName")+"."+o.get("name");
@@ -98,22 +100,23 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         var t = new joint.shapes.basic.Rect(attr);
         graph.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
-        return t;
       }
+      return t;
     }
     var a = renderFn.apply(this, arguments);
+    if(a)
+      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
 
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
       objectAttr = window.tildaCache[key];
       var fn = X[value.get("_type")];
-      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package, elementChangeHandler])
     })
     return a;
-
   }
-  var renderMapper = function(graph, object, position, objectAttr, package){
+  var renderMapper = function(graph, object, position, objectAttr, package, elementChangeHandler){
     var renderFn = function(g, o, p, attr, pkg){
 
       if(attr == null){
@@ -132,10 +135,12 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         var t = new joint.shapes.basic.Rect(attr);
         graph.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
-        return t;
       }
+      return t;
     }
     var a = renderFn.apply(this, arguments);
+    if(a)
+      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
 
     // dependencies;
     var references = object.get("references") || [];
@@ -143,7 +148,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       var key = package+"#"+value.get("friendlyName");
       objectAttr = window.tildaCache[key];
       var fn = X[value.get("_type")];
-      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package])
+      fn.apply(this, [graph, value, gotoNextPosition(position), objectAttr, package, elementChangeHandler])
     })
     return a;
   }

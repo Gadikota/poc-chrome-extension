@@ -134,10 +134,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
 
-          var t = objFn(graph, object, position, objectAttr, key);
-          if(t != null){
-            t.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
-          }
+          var t = objFn(graph, object, position, objectAttr, key, elementChangeHandler);
         }
       })
 
