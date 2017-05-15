@@ -53,25 +53,20 @@ define(["jointjs", "lodash", "jquery",
         target: { id: target.get("graphId") }
       })
     }
-    var hoorah = _.filter(renderedLinks, function(ele){
-      return ele.source.id == linkAttrs.source.id && ele.target.id == linkAttrs.target.id
-    })
-    if(hoorah.length == 0){
-      var vertices = linkAttrs.vertices;
-      var link = new joint.dia.Link(linkAttrs);
-      var eventHandler = function(event){
-        var key = event.get("attrs").key.toLowerCase();
-        var syncSet = {}
-        var attributes = event.attributes;
-        window.tildaCache[key] = _.merge(attributes, { vertices: this.get('vertices') })
-      }
-      if(vertices){
-        link.set('vertices', vertices);
-      }
-      link.on("change:vertices", _.debounce(eventHandler, 500, { 'maxWait' : 1000 }));
-      graph.addCell(link);
-      renderedLinks.push(linkAttrs); 
+    var vertices = linkAttrs.vertices;
+    var link = new joint.dia.Link(linkAttrs);
+    var eventHandler = function(event){
+      var key = event.get("attrs").key.toLowerCase();
+      var syncSet = {}
+      var attributes = event.attributes;
+      window.tildaCache[key] = _.merge(attributes, { vertices: this.get('vertices') })
     }
+    if(vertices){
+      link.set('vertices', vertices);
+    }
+    link.on("change:vertices", _.debounce(eventHandler, 500, { 'maxWait' : 1000 }));
+    graph.addCell(link);
+    renderedLinks.push(linkAttrs); 
   }
 
   var X = {};

@@ -38,8 +38,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       });
       this.objects = new ObjectCollection(objects);
     }
-
-    console.log("pKey --> "+this.pKey);
     var currentPos = { x: -150, y: 30 }
 
     this.resetAll = function(){
@@ -124,7 +122,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           paper.scale(newScale, newScale, p.x, p.y);
         }
       });
-      console.error("Package --> "+that.package+"#"+that.opts.viewOnly);
 
       _.each(this.objects, function(object, i){
         var object = that.objects.at(i);
@@ -133,7 +130,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         if ( objFn != null){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
-          console.log(objectAttr);
           var t = objFn(graph, object, position, objectAttr, that.pKey, elementChangeHandler);
         }
       })
