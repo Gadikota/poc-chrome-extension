@@ -135,6 +135,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           paper.scale(newScale, newScale, p.x, p.y);
         }
       });
+
       var x = 0;
       var y = 20;
       _.each(this.objects, function(object, i){
@@ -146,7 +147,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
           var t = objFn(graph, object, position, objectAttr, that.pKey, elementChangeHandler);
-          objFn(graph_1, object_1, {'x': x, 'y': y}, undefined, that.pKey, elementChangeHandler);
           y = y+40;
         }
       })

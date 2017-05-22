@@ -23,7 +23,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         }
       }
       if(o.get('graphId') == null){
-        var t = new joint.shapes.basic.Rect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr);
         g.addCell(t);
         o.set({graphId: t.id, rendered: true})
       }
@@ -58,7 +58,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       }
 
       if(o.get('graphId') == null){
-        var t = new joint.shapes.basic.Rect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr);
         g.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
       }
@@ -93,7 +93,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
 
       }
       if(object.get('graphId') == null){
-        var t = new joint.shapes.basic.Rect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr);
         graph.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
       }
@@ -128,7 +128,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         }           
       }
       if(o.get('graphId') == null){
-        var t = new joint.shapes.basic.Rect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr);
         graph.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
       }
