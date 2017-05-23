@@ -147,7 +147,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           var position = gotoNextPosition(currentPos);
           var objectAttr = window.tildaCache[key];
           var t = objFn(graph, object, position, objectAttr, that.pKey, elementChangeHandler);
-          y = y+40;
         }
       })
 
@@ -157,6 +156,18 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         var objFn = renderObjectRelations[key]
         if(objFn != null){
           objFn(graph, object, that.pKey);
+        }
+      })
+      var that = this;
+      graph.on('remove', function(cell) { 
+        console.log('deleted --> '+cell.id);
+        console.log(JSON.stringify(cell.attributes));
+        if(cell.get('type') == 'basic.Rect'){
+          var obj = that.objects.findWhere({graphId: cell.get('id')})
+          obj.set({graphId: null, rendered: false});
+          var objFn = renderObject[obj.get("_type")];
+          var t = objFn(graph_1, obj, {'x': x, 'y': y}, undefined, that.pKey, elementChangeHandler);
+          y = y+40;
         }
       })
 

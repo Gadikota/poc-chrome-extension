@@ -28,6 +28,15 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
   var CustomElementView = joint.dia.ElementView.extend({
     events: {
       'dblclick': 'dblclick',
+      'click .deleteTool': 'deleteElement'
+    },
+    deleteElement: function(event){
+      var connectedLinks = this.paper.model.getConnectedLinks(this.model, {deep: true});
+      this.remove();
+      this.paper.model.trigger('remove', this.model)
+      _.each(connectedLinks, function(ele, i){
+        ele.remove();
+      })
     },
     dblclick: function(evt, x, y){
       var neighbors = this.paper.model.getNeighbors(this.model);
