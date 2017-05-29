@@ -57,7 +57,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           } 
         }
       }
-
+      console.log(name+" --> Graph ID "+o.get("graphId") )
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         t.set({schemaId: o.get('id')})
@@ -66,6 +66,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       }
       return t;
     }
+
     var a = renderFn.apply(this, arguments);
     if(a)
       a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
