@@ -4,6 +4,13 @@ define(["jointjs", "lodash", "jquery",
   var renderObject = Helpers.renderObject;
   var renderedLinks = [];
   var renderLink = function(graph, source, target, pKey){
+    var elements = graph.getElements();
+    var sources = _.where(elements, {id: source.get("graphId") });
+    var targets = _.where(elements, {id: target.get("graphId") });
+    if(sources.length == 0 || targets.length == 0){
+      return false;
+    }
+
     var key = pKey+"#"+source.get("friendlyName")+"#"+target.get("friendlyName");
     var linkAttrs = window.tildaCache[key];
     if(linkAttrs == null){
