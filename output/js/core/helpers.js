@@ -22,6 +22,12 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           }
         }
       }
+      if(attr[package] != null && attr[package].hidden){
+        var t = new joint.shapes.basic.CustomRect(attr);
+        o.set({graphId: t.id})
+        graph.trigger('remove', {model: t})
+        return null;
+      }
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         t.set({schemaId: o.get('id')})
@@ -30,9 +36,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       }
       return t;
     }
-    var a = renderFn.apply(this, arguments);
-    if(a)
-      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
+    if(object.get(package) != null){
+      var a = renderFn.apply(this, arguments);
+      if(a)
+        a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));      
+    }
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
@@ -57,7 +65,12 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           } 
         }
       }
-      console.log(name+" --> Graph ID "+o.get("graphId") )
+      if(attr[package] != null && attr[package].hidden){
+        var t = new joint.shapes.basic.CustomRect(attr);
+        o.set({graphId: t.id})
+        graph.trigger('remove', {model: t})
+        return null;
+      }
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         t.set({schemaId: o.get('id')})
@@ -66,11 +79,9 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       }
       return t;
     }
-
     var a = renderFn.apply(this, arguments);
     if(a)
-      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
-
+      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));      
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
@@ -93,7 +104,12 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
             text: { text: name, fill: 'black'} 
           } 
         }
-
+      }
+      if(attr[package] != null && attr[package].hidden){
+        var t = new joint.shapes.basic.CustomRect(attr);
+        o.set({graphId: t.id})
+        graph.trigger('remove', {model: t})
+        return null;
       }
       if(object.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
@@ -105,8 +121,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
     }
     var a = renderFn.apply(this, arguments);
     if(a)
-      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
-
+      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));      
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
@@ -130,6 +145,13 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
             text: { text: name, fill: 'black'} 
           } 
         }           
+      }
+
+      if(attr[package] != null && attr[package].hidden){
+        var t = new joint.shapes.basic.CustomRect(attr);
+        o.set({graphId: t.id})
+        graph.trigger('remove', {model: t})
+        return null;
       }
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);

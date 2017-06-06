@@ -57,7 +57,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       var that = this;
 
       var elementChangeHandler = function(event){
-        var eventObject = that.collection.findWhere({graphId: event.get("id")})
+        var eventObject = that.collection.findWhere({graphId: this.get("id")})
         if(eventObject == null){
           return true;
         }
@@ -67,7 +67,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           eventObject.get("data").position = {};
           var position = eventObject.get("data").position;
         }
-        window.tildaCache[key] = event.toJSON();
+        window.tildaCache[key] = this.toJSON();
       }
 
       var gotoNextPosition = function(currentPos){
@@ -93,6 +93,55 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         elementView: CustomElementView,
         linkView: CustomLinkView
       });
+
+      graph.on('remove', function(view) {
+        var cell = view.model;
+        if(cell && cell.get('type') == 'basic.Rect'){
+          var obj = that.objects.findWhere({graphId: cell.get('id')});
+          cell.set(that.pKey, {hidden: true});
+          var key = that.pKey+"#"+obj.get("friendlyName");
+          window.tildaCache[key] = cell.toJSON();
+          if(obj == null){
+            obj = that.collection.findWhere({graphId: cell.get('id')})
+          }
+          obj.set({graphId: null, rendered: false, nocache: true});
+          var objFn = renderObject[obj.get("_type")];
+          var t = objFn(graph_1, obj, {'x': x, 'y': y}, undefined, that.pKey+".hidden", elementChangeHandler);
+          y = y+40;
+        }
+      })
+
+
+      graph_1.on('remove', function(view) { 
+        var cell = view.model;
+        if(cell && cell.get('type') == 'basic.Rect'){
+          var object = that.objects.findWhere({graphId: cell.get('id')})
+          if(object == null){
+            object = that.collection.findWhere({graphId: cell.get('id')})
+          }
+          cell.unset(that.pKey);
+          var key = that.pKey+"#"+object.get("friendlyName");
+          window.tildaCache[key] = cell.toJSON();
+          object.set({graphId: null, rendered: false});
+          var key = that.pKey+"#"+object.get("friendlyName");
+          var objFn = renderObject[object.get("_type")];
+
+          if ( objFn != null){
+            console.log("Graph ID "+object.get("graphId") )
+            var position = gotoNextPosition(currentPos);
+            var objectAttr = window.tildaCache[key];
+            var t = objFn(graph, object, position, undefined, that.pKey, elementChangeHandler);
+            objectAttr.id = t.id;
+            t.set(objectAttr);
+            var key = object.get("_type");
+            var objFn = renderObjectRelations[key]
+            if(objFn != null){
+              objFn(graph, object, that.pKey);
+            }
+            renderAllLinks();
+          }
+        }
+      })
 
       var paper = new joint.dia.Paper({
         el: $("#"+this.eleId),
@@ -165,49 +214,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       }
 
       renderAllLinks();
-      graph.on('remove', function(view) {
-        var cell = view.model;
-        if(cell && cell.get('type') == 'basic.Rect'){
-          var obj = that.objects.findWhere({graphId: cell.get('id')})
-          if(obj == null){
-            obj = that.collection.findWhere({graphId: cell.get('id')})
-          }
-          obj.set({graphId: null, rendered: false, nocache: true});
-          var objFn = renderObject[obj.get("_type")];
-          var t = objFn(graph_1, obj, {'x': x, 'y': y}, undefined, that.pKey, elementChangeHandler);
-          y = y+40;
-        }
-      })
 
-
-      graph_1.on('remove', function(view) { 
-        var cell = view.model;
-        if(cell && cell.get('type') == 'basic.Rect'){
-          var object = that.objects.findWhere({graphId: cell.get('id')})
-          if(object == null){
-            object = that.collection.findWhere({graphId: cell.get('id')})
-          }
-
-          object.set({graphId: null, rendered: false});
-          var key = that.pKey+"#"+object.get("friendlyName");
-          var objFn = renderObject[object.get("_type")];
-
-          if ( objFn != null){
-            console.log("Graph ID "+object.get("graphId") )
-            var position = gotoNextPosition(currentPos);
-            var objectAttr = window.tildaCache[key];
-            var t = objFn(graph, object, position, undefined, that.pKey, elementChangeHandler);
-            objectAttr.id = t.id;
-            t.set(objectAttr);
-            var key = object.get("_type");
-            var objFn = renderObjectRelations[key]
-            if(objFn != null){
-              objFn(graph, object, that.pKey);
-            }
-            renderAllLinks();
-          }
-        }
-      })
     }
     try{
       this.render();
