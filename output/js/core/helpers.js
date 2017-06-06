@@ -22,17 +22,15 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           }
         }
       }
-      if(attr[package] != null && attr[package].hidden){
-        var t = new joint.shapes.basic.CustomRect(attr);
-        o.set({graphId: t.id})
-        graph.trigger('remove', {model: t})
-        return null;
-      }
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
-        t.set({schemaId: o.get('id')})
-        g.addCell(t);
-        o.set({graphId: t.id, rendered: true})
+        o.set({graphId: t.id, rendered: true, package: package})
+        if(attr[package] != null && attr[package].hidden){
+          graph.trigger('remove', {model: t})
+          return null;
+        } else{
+          g.addCell(t);
+        }
       }
       return t;
     }
@@ -65,17 +63,15 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           } 
         }
       }
-      if(attr[package] != null && attr[package].hidden){
-        var t = new joint.shapes.basic.CustomRect(attr);
-        o.set({graphId: t.id})
-        graph.trigger('remove', {model: t})
-        return null;
-      }
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
-        t.set({schemaId: o.get('id')})
-        g.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
+        if(attr[package] != null && attr[package].hidden){
+          graph.trigger('remove', {model: t})
+          return null;
+        } else{
+          g.addCell(t);
+        }
       }
       return t;
     }
@@ -105,17 +101,15 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           } 
         }
       }
-      if(attr[package] != null && attr[package].hidden){
+      if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
-        o.set({graphId: t.id})
-        graph.trigger('remove', {model: t})
-        return null;
-      }
-      if(object.get('graphId') == null){
-        var t = new joint.shapes.basic.CustomRect(attr);
-        t.set({schemaId: o.get('id')})
-        graph.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
+        if(attr[package] != null && attr[package].hidden){
+          graph.trigger('remove', {model: t})
+          return null;
+        } else{
+          g.addCell(t);
+        }
       }
       return t;
     }
@@ -147,17 +141,15 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         }           
       }
 
-      if(attr[package] != null && attr[package].hidden){
-        var t = new joint.shapes.basic.CustomRect(attr);
-        o.set({graphId: t.id})
-        graph.trigger('remove', {model: t})
-        return null;
-      }
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
-        t.set({schemaId: o.get('id')})
-        graph.addCell(t);
         o.set({graphId: t.id, rendered: true, package: package})
+        if(attr[package] != null && attr[package].hidden){
+          graph.trigger('remove', {model: t})
+          return null;
+        } else{
+          g.addCell(t);
+        }
       }
       return t;
     }
