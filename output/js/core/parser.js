@@ -22,7 +22,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.pKey = this.schema.package.toLowerCase()+"#"+this.opts.viewOnly;
     this.objects = new ObjectCollection();
     this.paper = null;
-    this.wheelDelta = 1;
     console.log("pKey --> "+this.pKey)
     var currentPos = { x: -150, y: 30 }
     this.parse = function(){
@@ -104,11 +103,13 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         linkView: CustomLinkView
       });
       this.paper = paper;
-
+      var V = joint.V;
 
       var dragStartPosition = null;
       paper.on('blank:pointerdown',function(event, x, y) {
-        dragStartPosition = { x: x, y: y};
+
+        var scale = V(paper.viewport).scale();
+        dragStartPosition = { x: x * scale.sx, y: y * scale.sy};
       });
       paper.on('cell:pointerup blank:pointerup', function(cellView, x, y) {
         dragStartPosition = null;
@@ -124,8 +125,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         //function onMouseWheel(e){
         e.preventDefault();
         e = e.originalEvent;
-        var V = joint.V;
-        that.wheelDelta = e.wheelDelta;
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))) / 50;
         var offsetX = (e.offsetX || e.clientX - $(this).offset().left);
 
