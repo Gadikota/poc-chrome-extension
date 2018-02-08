@@ -22,6 +22,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.pKey = this.schema.package.toLowerCase()+"#"+this.opts.viewOnly;
     this.objects = new ObjectCollection();
     this.paper = null;
+    this.wheelDelta = 1;
     console.log("pKey --> "+this.pKey)
     var currentPos = { x: -150, y: 30 }
     this.parse = function(){
@@ -114,8 +115,8 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       });
       paper.$el.mousemove(function(event) {
         if (dragStartPosition != null){
-          paper.setOrigin(event.offsetX - dragStartPosition.x-$(this).offset().left,
-           event.offsetY - dragStartPosition.y-$(this).offset().top);
+          var origin = paper.options.origin;
+          paper.setOrigin(event.offsetX - dragStartPosition.x, event.offsetY - dragStartPosition.y);
         }
       });
 
@@ -124,6 +125,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         e.preventDefault();
         e = e.originalEvent;
         var V = joint.V;
+        that.wheelDelta = e.wheelDelta;
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))) / 50;
         var offsetX = (e.offsetX || e.clientX - $(this).offset().left);
 
