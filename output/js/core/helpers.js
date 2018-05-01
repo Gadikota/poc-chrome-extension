@@ -8,7 +8,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           size: { width: object.get("name").length*12, height: 30 },
           attrs: { 
             rect: { fill: 'rgb(169,209,142)', stroke: "rgb(0,176,80)", "stroke-width": 1, "stroke-dasharray": "3,3" },
-            text: { text: object.get("name"), fill: 'black'} 
+            text: { text: object.get("name"), fill: 'black', magnet: true } 
           } 
         }
       }
@@ -58,7 +58,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           attrs: { 
             id: object.get("name").toLowerCase(),
             rect: { fill: 'rgb(251,229,214)', stroke: "rgb(248,203,173)", "stroke-width": 1  },
-            text: { text: object.get("name"), fill: 'black'} 
+            text: { text: object.get("name"), fill: 'black', magnet: true } 
           } 
         }
       }
@@ -75,7 +75,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           attrs: { 
             id: object.get("name").toLowerCase(),
             rect: { fill: 'rgb(248,203,173)', stroke: "rgb(244,177,131)", "stroke-width": 2  },
-            text: { text: object.get("name"), fill: 'black'} 
+            text: { text: object.get("name"), fill: 'black', magnet: true } 
           } 
         }           
       }
