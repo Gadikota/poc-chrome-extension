@@ -22,8 +22,6 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           }
         }
       }
-      console.debug(arguments);
-      // attr.model = new joint.shapes.devs.Model(attr)
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})
@@ -36,9 +34,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       }
       return t;
     }
-    var a = renderFn.apply(this, arguments);
-    if(a)
-      a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));
+    if(object.get(package) != null){
+      var a = renderFn.apply(this, arguments);
+      if(a)
+        a.on('change:position', _.debounce(elementChangeHandler, 500, { 'maxWait' : 1000 }));      
+    }
     var references = object.get("references") || [];
     _.each(references, function(value, i){
       var key = package+"#"+value.get("friendlyName");
@@ -54,17 +54,15 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         // , "stroke-dasharray": "3,3"  },
         attr = {
-          id: o.get("friendlyName"),
           position: p,
           size: { width: name.length*12, height: 30 },
           attrs: {
             id: o.get("friendlyName"),
             rect: { fill: 'rgb(46,117,182)', stroke: "rgb(65,113,156)", "stroke-width": 2 },
             text: { text: name, fill: 'white'}
-          }
+          } 
         }
       }
-      // attr.model = new joint.shapes.devs.Model(attr)
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})
@@ -94,7 +92,6 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         var name = o.get("schemaName")+"."+o.get("name");
         attr = {
-          id: o.get("friendlyName"),
           position: position,
           size: { width: name.length*12, height: 30 },
           attrs: { 
@@ -104,7 +101,6 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           } 
         }
       }
-      // attr.model = new joint.shapes.devs.Model(attr)
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})
@@ -135,7 +131,6 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         var name = o.get("schemaName")+"."+o.get("name");
         attr = {
-          id: o.get("friendlyName"),
           position: position,
           size: { width: name.length*12, height: 30 },
           attrs: { 
@@ -143,10 +138,9 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
             rect: { fill: 'rgb(248,203,173)', stroke: "rgb(244,177,131)", "stroke-width": 2  },
             text: { text: name, fill: 'black'} 
           } 
-        }
+        }           
       }
 
-      // attr.model = new joint.shapes.devs.Model(attr)
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})

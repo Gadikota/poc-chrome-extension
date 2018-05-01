@@ -32,7 +32,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     })
     if(this.opts.viewOnly){
       this.objects = new ObjectCollection(this.collection.where({_type: "View", schemaName: this.schemaName}));
-      console.debug(this.objects);
     } else {
       var objects = this.collection.filter(function (obj) {
         return obj.get('_type') !== 'View' && obj.get('schemaName') == that.schemaName;
@@ -155,22 +154,20 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         linkView: CustomLinkView
       });
       this.paper = paper;
-      var V = joint.V;
       window.paper = paper;
       window.paper_1 = paper_1;
 
       var dragStartPosition = null;
       paper.on('blank:pointerdown',function(event, x, y) {
-
-        var scale = V(paper.viewport).scale();
-        dragStartPosition = { x: x * scale.sx, y: y * scale.sy};
+        dragStartPosition = { x: x, y: y};
       });
       paper.on('cell:pointerup blank:pointerup', function(cellView, x, y) {
         dragStartPosition = null;
       });
       paper.$el.mousemove(function(event) {
         if (dragStartPosition != null){
-          paper.setOrigin(event.offsetX - dragStartPosition.x, event.offsetY - dragStartPosition.y);
+          paper.setOrigin(event.offsetX - dragStartPosition.x-$(this).offset().left,
+           event.offsetY - dragStartPosition.y-$(this).offset().top);
         }
       });
 
@@ -178,6 +175,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         //function onMouseWheel(e){
         e.preventDefault();
         e = e.originalEvent;
+        var V = joint.V;
         var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))) / 50;
         var offsetX = (e.offsetX || e.clientX - $(this).offset().left);
 
@@ -190,7 +188,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           paper.scale(newScale, newScale, p.x, p.y);
         }
       });
-
 
       var x = 0;
       var y = 20;
