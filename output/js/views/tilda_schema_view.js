@@ -24,7 +24,7 @@ define(['text!../templates/tilda_schema/_new.html',
     $.each(defaultCanvases, function(key, value){
       value.package = package;
       var p = new _Parser(fName, "obj_c", {viewOnly: value.viewOnly, package: value.package});
-      svgHTML[value.name] = { svg: p.paper.$el.find("svg")[0].parentElement.innerHTML};
+      svgHTML[value.name]["svg"] = p.paper.$el.find("svg")[0].parentElement.innerHTML;
     })
   }
   var fileInputHandler = function(viewScope, entry) {
@@ -78,7 +78,7 @@ define(['text!../templates/tilda_schema/_new.html',
         console.error("Name cannot be object or view");
         return false;
       }
-      tildaCache.canvases.push({
+      window.tildaCache.canvases.push({
         name: name,
         package: currentOpts.package,
         viewOnly: currentOpts.viewOnly || false
@@ -143,7 +143,7 @@ define(['text!../templates/tilda_schema/_new.html',
       var schemaFname = $('select').val();
       var selectValue = $(event.target).val()
       var that = this;
-      svgHTML[olderViewName] = { svg: this.$el.find("#obj_c").find("svg")[0].parentElement.innerHTML };
+      svgHTML[olderViewName]["svg"] = this.$el.find("#obj_c").find("svg")[0].parentElement.innerHTML;
       var schemaEntry = this.schemaEntries[schemaFname];
       var reader = new FileReader();
       this.$el.find("#obj_c").html("");
