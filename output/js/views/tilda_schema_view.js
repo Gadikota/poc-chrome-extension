@@ -7,7 +7,7 @@ define(['text!../templates/tilda_schema/_new.html',
   }
 
   var svgHTML = {}
-  var defaultCanvases = [{name: "object", package: null, viewOnly: false}, {name: "view", package: null, viewOnly: true}];
+  var defaultCanvases = [{name: "object", title: "Tables Graph", package: null, viewOnly: false}, {name: "view", title: "Views Graph", package: null, viewOnly: true}];
   svgHTML["object"] = { name: "Tables Graph", svg: null };
   svgHTML["view"] = { name: "Views Graph", svg: null };
   var olderViewName = null;
@@ -19,11 +19,12 @@ define(['text!../templates/tilda_schema/_new.html',
     reject(error);
   }
   var SCHEMA_REGEX = /\_tilda\.([A-Z][A-Za-z_0-9]+)\.json/i;
-  var populateSVGHTML = function(fName, package)
+  var populateSVGHTML = function(canvases, fName, package)
   {
-    $.each(defaultCanvases, function(key, value){
+    $.each(canvases, function(key, value){
       value.package = package;
       var p = new _Parser(fName, "obj_c", {viewOnly: value.viewOnly, package: value.package});
+      svgHTML[value.name] = svgHTML[value.name] || {};
       svgHTML[value.name]["svg"] = p.paper.$el.find("svg")[0].parentElement.innerHTML;
     })
   }
@@ -84,7 +85,7 @@ define(['text!../templates/tilda_schema/_new.html',
         viewOnly: currentOpts.viewOnly || false
       })
 
-      $(".add-view-holder").append("<input type='radio' name='showObj' value='"+name+"'>"+name);
+      $(".add-view-holder").append("<label class='radio-inline'><input type='radio' name='showObj' value='"+name+"'>"+name+"</label>");
       $(".showObj").val(name);
       $('#createCanvasD').modal('hide');
     },
@@ -107,6 +108,11 @@ define(['text!../templates/tilda_schema/_new.html',
         that.packageInfo = pkgInfo;
         that.initCache(objectEntries.cacheEntry).then(function(cache){
           window.tildaCache = cache;
+          $.each(tildaCache.canvases, function(key, v)
+          {
+            $(".add-view-holder").append("<label class='radio-inline'><input type='radio' name='showObj' value='"+v.name+"'>"+v.name+"</label>");
+          })
+
           var schemaFname = "_tilda."+pkgInfo.schema.name+".json";
           that.$el.find(".fName").html("<h4>loaded <i>"+schemaFname+"</i></h4>")
           that.$el.find("#obj_c").html("");
@@ -114,7 +120,7 @@ define(['text!../templates/tilda_schema/_new.html',
           reader.onload = function(e) {
             var schema = JSON.parse(e.target.result);
             olderViewName = "object";
-            populateSVGHTML(schemaFname, schema.package);
+            populateSVGHTML(tildaCache.canvases, schemaFname, schema.package);
             that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false, package: schema.package});
           }
           schemaEntry.file(function(schemaEntryF){
