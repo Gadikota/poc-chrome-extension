@@ -24,6 +24,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.collection = window.collection.clone();
     this.schemaName = this.package.split(".")[1];
     this.pKey = opts.package+"#"+this.opts.viewOnly;
+    this.currentScale = 1;
     var that = this;
     // reset object positions.
     _.each(this.collection, function(object, i){
@@ -108,12 +109,13 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           obj.set({graphId: null, rendered: false, nocache: true});
           var objFn = renderObject[obj.get("_type")];
           var t = objFn(graph_1, obj, {'x': x, 'y': y}, undefined, that.pKey+".hidden", elementChangeHandler);
+          paper_1.scale(that.currentScale);
           y = y+40;
         }
       })
 
 
-      graph_1.on('remove', function(view) { 
+      graph_1.on('remove', function(view) {
         var cell = view.model;
         if(cell && cell.get('type') == 'basic.Rect'){
           var object = that.objects.findWhere({graphId: cell.get('id')})
@@ -131,7 +133,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
             console.log("Graph ID "+object.get("graphId") )
             var position = gotoNextPosition(currentPos);
             var objectAttr = window.tildaCache[key];
-            var t = objFn(graph, object, position, undefined, that.pKey, elementChangeHandler);
+            var t = objFn(graph, object, position, objectAttr, that.pKey, elementChangeHandler);
             objectAttr.id = t.id;
             t.set(objectAttr);
             var key = object.get("_type");
@@ -188,6 +190,8 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         if (newScale > 0.4 && newScale < 2) {
           paper.setOrigin(0, 0);
           paper.scale(newScale, newScale, p.x, p.y);
+          that.currentScale = newScale;
+          paper_1.scale(newScale);
         }
       });
 
