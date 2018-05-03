@@ -6,6 +6,11 @@ define(['text!../templates/tilda_schema/_new.html',
     console.log(error.stack);
   }
 
+  var svgHTML = {}
+  var defaultCanvases = [{name: "object", package: null, viewOnly: false}, {name: "view", package: null, viewOnly: true}];
+  svgHTML["object"] = { name: "Tables Graph", svg: null };
+  svgHTML["view"] = { name: "Views Graph", svg: null };
+  var olderViewName = null;
   var Backbone = require('backbone');
   var _ = require('lodash');
   var promiseError = function(error, reject){
@@ -14,7 +19,14 @@ define(['text!../templates/tilda_schema/_new.html',
     reject(error);
   }
   var SCHEMA_REGEX = /\_tilda\.([A-Z][A-Za-z_0-9]+)\.json/i;
-
+  var populateSVGHTML = function(fName, package)
+  {
+    $.each(defaultCanvases, function(key, value){
+      value.package = package;
+      var p = new _Parser(fName, "obj_c", {viewOnly: value.viewOnly, package: value.package});
+      svgHTML[value.name] = { svg: p.paper.$el.find("svg")[0].parentElement.innerHTML};
+    })
+  }
   var fileInputHandler = function(viewScope, entry) {
     viewScope.currentEntry = entry;
     var reader = entry.createReader();
@@ -49,19 +61,24 @@ define(['text!../templates/tilda_schema/_new.html',
       'change input:radio[name="showObj"]': "togglePapers",
       'change select': "changeView",
       'click .save-regex': 'saveRegex',
+      'click .createCanvas': 'createCanvas',
       'click .filterRegex': function(){
         $('#filterD').modal('show');
+      },
+      'click .newCanvas': function(){
+        $('#createCanvasD').modal('show');
       }
+    },
+    createCanvas: function(event)
+    {
+      debugger;
     },
     saveRegex: function(event){
       var value = $('.regex-f').val();
       this.excludeRegex = new RegExp(value, 'i');
-      console.log(chrome.storage);
       if(chrome.storage){
         chrome.storage.local.set("regex-f", value);
       }
-      console.log(value);
-      console.log(this.excludeRegex);
       $('#filterD').modal('hide');
       fileInputHandler(this, this.savedEntry);
     },
@@ -81,6 +98,8 @@ define(['text!../templates/tilda_schema/_new.html',
           var reader = new FileReader();
           reader.onload = function(e) {
             var schema = JSON.parse(e.target.result);
+            olderViewName = "object";
+            populateSVGHTML(schemaFname, schema.package);
             that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false, package: schema.package});
           }
           schemaEntry.file(function(schemaEntryF){
@@ -107,17 +126,20 @@ define(['text!../templates/tilda_schema/_new.html',
     },
     togglePapers: function(event){
       var schemaFname = $('select').val();
-      this.$el.find("#obj_c").html("");
+      var that = this;
+      svgHTML[olderViewName] = { svg: this.$el.find("#obj_c").find("svg")[0].parentElement.innerHTML };
       var schemaEntry = this.schemaEntries[schemaFname];
       var reader = new FileReader();
+      this.$el.find("#obj_c").html("");
       reader.onload = function(e) {
         var schema = JSON.parse(e.target.result);
         if($(event.target).val() == "object"){
-            this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false, package: schema.package});
+            that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false, package: schema.package});
         } else{
-            this.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: true, package: schema.package});
+            that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: true, package: schema.package});
         }
       }
+      olderViewName = $(event.target).val();
       schemaEntry.file(function(schemaEntryF){
         reader.readAsText(schemaEntryF);
       });
@@ -190,9 +212,10 @@ define(['text!../templates/tilda_schema/_new.html',
     },
     writeSVG: function(entry, event){
       // TODO write to a file.
-      var objSVG = this.schemaParser_object.paper.$el.find("svg")[0]
+      // var objSVG = this.schemaParser_object.paper.$el.find("svg")[0];
 
-      var viewSVG = this.schemaParser_view.paper.$el.find("svg")[0];
+      // var viewSVG = this.schemaParser_view.paper.$el.find("svg")[0];
+
       var that = this;
       var fileName = "_tilda."+this.packageInfo.schema.name.toUpperCase()+".html";
       // var docText = _.map(that.schemaParser_object.schema.documentation.description, function(line){
@@ -227,18 +250,17 @@ define(['text!../templates/tilda_schema/_new.html',
                   bindElementClickEvent();\n\
                 }\n\
               </script>";
-            var blob = new Blob(["<style>"+css+"</style>", 
-                "<div><h1>Tables Graph</h1></div>\n",
-                "<div class='container'>\n",
-                objSVG.parentElement.innerHTML,
-                "\n</div>\n", 
-                "<br/>\n",
-                "<div><h1>Views Graph</h1></div>\n",
-                "<div class='container'>\n",
-                viewSVG.parentElement.innerHTML,
-                "\n</div>\n",
-                script
-              ], {type: "image/svg"});
+            var blobArr = ["<style>"+css+"</style>"];
+
+            $.each(svgHTML, function(key, value){
+              blobArr.push("<fieldset><legend>"+value.name+"</legend>");
+              blobArr.push("<div class='container'>");
+              blobArr.push(value.svg);
+              blobArr.push("\n</div>\n");
+              blobArr.push("<br/>\n");
+              blobArr.push("</fieldset>");
+            });
+            var blob = new Blob(blobArr, {type: "image/svg"});
             fileWriter.onwriteend = function(e) {
               if (!truncated) {
                 truncated = true;

@@ -22,7 +22,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
           }
         }
       }
-      console.debug(arguments);
+
       // attr.model = new joint.shapes.devs.Model(attr)
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr).clone();

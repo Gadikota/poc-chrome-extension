@@ -219,9 +219,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           }
         })        
       }
-
       renderAllLinks();
-
     }
     try{
       this.render();

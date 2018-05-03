@@ -19,9 +19,16 @@
         <label class="radio-inline">
           <input type="radio" name="showObj" value="view"> View
         </label>
-        <label class="radio-inline">
-          <button class="saveSchema form-control">Save</button>
+        <label class="radio-inline add-view-holder">
         </label>
+        <span>
+          <label class="radio-inline">
+            <button class="saveSchema form-control">Save</button>
+          </label>
+          <label class="radio-inline">
+            <button class="newCanvas form-control">New ?</button>
+          </label>
+        </span>
       </form>
     </div>
   </div>
@@ -54,6 +61,32 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary save-regex">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+<div id="createCanvasD" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="gridSystemModalLabel">New Canvas ?</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" class="form-control" placeholder="Canvas title">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary createCanvas" data-dismiss="modal">Save changes</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
