@@ -71,7 +71,22 @@ define(['text!../templates/tilda_schema/_new.html',
     },
     createCanvas: function(event)
     {
-      debugger;
+      var currentOpts = this.schemaParser_object.opts;
+      var name = $("#canvas_name").val();
+      if(name == "object" || name == "view")
+      {
+        console.error("Name cannot be object or view");
+        return false;
+      }
+      tildaCache.canvases.push({
+        name: name,
+        package: currentOpts.package,
+        viewOnly: currentOpts.viewOnly || false
+      })
+
+      $(".add-view-holder").append("<input type='radio' name='showObj' value='"+name+"'>"+name);
+      $(".showObj").val(name);
+      $('#createCanvasD').modal('hide');
     },
     saveRegex: function(event){
       var value = $('.regex-f').val();
@@ -126,6 +141,7 @@ define(['text!../templates/tilda_schema/_new.html',
     },
     togglePapers: function(event){
       var schemaFname = $('select').val();
+      var selectValue = $(event.target).val()
       var that = this;
       svgHTML[olderViewName] = { svg: this.$el.find("#obj_c").find("svg")[0].parentElement.innerHTML };
       var schemaEntry = this.schemaEntries[schemaFname];
@@ -133,13 +149,13 @@ define(['text!../templates/tilda_schema/_new.html',
       this.$el.find("#obj_c").html("");
       reader.onload = function(e) {
         var schema = JSON.parse(e.target.result);
-        if($(event.target).val() == "object"){
-            that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: false, package: schema.package});
-        } else{
-            that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: true, package: schema.package});
-        }
+        canvasConfig = tildaCache.canvases.filter(function(canvas)
+        {
+          return canvas.name == selectValue;
+        })[0]
+        that.schemaParser_object = new _Parser(schemaFname, "obj_c", {viewOnly: canvasConfig.viewOnly, package: canvasConfig.package});
       }
-      olderViewName = $(event.target).val();
+      olderViewName = selectValue;
       schemaEntry.file(function(schemaEntryF){
         reader.readAsText(schemaEntryF);
       });
@@ -170,7 +186,8 @@ define(['text!../templates/tilda_schema/_new.html',
           reader.onload = function(event) {
             try{
               var tildaCache = JSON.parse(event.target.result) || {};
-              resolve(tildaCache)
+              tildaCache.canvases = tildaCache.canvases || defaultCanvases;
+              resolve(tildaCache);
             } catch(e){
               resolve({})
             }
