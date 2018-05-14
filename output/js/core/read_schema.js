@@ -7,32 +7,55 @@ function(ParserElement, Collection){
       _.each(elementArr, function(value, i){
         var schemaName = package.split(".")[1];
         var objectName = value.name;
-        var friendlyName = value.name.toLowerCase();
+        var friendlyName = schemaName+"."+value.name.toLowerCase();
         var references = [];
         _.each(value.primaryColumns, function(column, j){
           if(column.sameas != null){
-            var sameas = column.sameas.split(".");
-            var reference = sameas.reverse()[1];
+            var sameas = column.sameas.split(".").reverse();
+            var reference = sameas[1];
+            var schema = sameas[2];
+            schema = schema || schemaName;
             if(reference != null){
               reference = reference.toLowerCase();
+              reference = schema+"."+reference.toLowerCase();
               if(reference != objectName && references.indexOf(reference) == -1){
                 references.push(reference);
               }
             }
           }
         })
-        _.each(value.columns, function(column, j){
-          if(column.sameas != null){
-            var sameas = column.sameas.split(".");
-            var reference = sameas.reverse()[1];
+        if(_type.toLowerCase() != "view")
+        {
+          _.each(value.foreign, function(foreign, j){
+            var sameas = foreign.destObject.split(".").reverse();
+            var reference = sameas[0];
+            var schema = sameas[1];
+            schema = schema || schemaName;
             if(reference != null){
-              reference = reference.toLowerCase();
+              reference = schema+"."+reference.toLowerCase();
               if(references.indexOf(reference) == -1){
                 references.push(reference);
               }
             }
-          }
-        })
+          })
+        }
+        else
+        {
+          _.each(value.columns, function(column, j){
+            if(column.sameas != null){
+              var sameas = column.sameas.split(".").reverse();
+              var reference = sameas[1];
+              var schema = sameas[2];
+              schema = schema || schemaName;
+              if(reference != null){
+                reference = schema+"."+reference.toLowerCase();
+                if(references.indexOf(reference) == -1){
+                  references.push(reference);
+                }
+               }
+             }
+           })
+        }
         var element = new ParserElement();
         element.set({
           schemaName: schemaName,
@@ -53,6 +76,7 @@ function(ParserElement, Collection){
       }
       var reader = new FileReader();
       var fileEntry = fileEntries[index];
+      console.log("Reading -> "+fileEntry.name);
       reader.onload = function(e) {
         var package = fileEntry.name; 
         var schema = JSON.parse(event.target.result);
@@ -82,7 +106,7 @@ function(ParserElement, Collection){
         var refObjs = [];
         if( references != null && references.length > 0){
           _.each(references, function(ref, i){
-            var refObj = collection.findWhere( {friendlyName: ref })
+            var refObj = collection.findWhere( {friendlyName: ref }, {caseInsensitive: true})
             if(refObj != null){
               refObjs.push(refObj)
             } else {

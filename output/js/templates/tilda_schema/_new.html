@@ -6,21 +6,29 @@
   <div class="row actions">
     <hr/>
     <div class="col-md-4">
-      <select class="form-control"></select>
+      <select class="form-control schemas"></select>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-7">
       <form>
         <label class="radio-inline">
           <a class="filterRegex form-control">Filter</a>
         </label>
-        <span class="add-view-holder">
-        </span>
+        <label class="radio-inline">
+          <select class="add-view-holder form-control">
+          </select>
+        </label>
         <span>
           <label class="radio-inline">
             <button class="saveSchema form-control">Save</button>
           </label>
           <label class="radio-inline">
             <button class="newCanvas form-control">New ?</button>
+          </label>
+          <label class="radio-inline hidden">
+            <button class="renameCanvas form-control">Rename ?</button>
+          </label>
+          <label class="radio-inline hidden">
+            <button class="deleteCanvas form-control">Delete ?</button>
           </label>
         </span>
       </form>
@@ -33,7 +41,6 @@
     <div class="col-md-3 rendered_objects" style="border-left: 1px solid black;z-index: 1000">
       <div id='robj'></div>
     </div>
-    <div id="view_c" class="obj"> </div>
   </div>
 </div>
 
@@ -75,6 +82,7 @@
           <div class="form-group">
             <label for="name">Name</label>
             <input type="text" id="canvas_name" class="form-control" placeholder="Canvas title">
+            <input type="hidden" id="new_canvas" value="1"/>
           </div>
         </form>
       </div>

@@ -23,7 +23,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.paper = null;
     this.collection = window.collection.clone();
     this.schemaName = this.package.split(".")[1];
-    this.pKey = opts.package+"#"+this.opts.viewOnly;
+    this.pKey = opts.package+"."+this.opts.name;
     this.currentScale = 1;
     var that = this;
     // reset object positions.
@@ -31,10 +31,12 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       var object = that.collection.at(i);
       object.set({"graphId": null});
     })
-    if(this.opts.viewOnly){
+    if(this.opts.viewOnly)
+    {
       this.objects = new ObjectCollection(this.collection.where({_type: "View", schemaName: this.schemaName}));
-      console.debug(this.objects);
-    } else {
+    }
+    else 
+    {
       var objects = this.collection.filter(function (obj) {
         return obj.get('_type') !== 'View' && obj.get('schemaName') == that.schemaName;
       });
@@ -84,6 +86,18 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
 
       var graph = new joint.dia.Graph;
       var graph_1 = new joint.dia.Graph;
+
+      var paper = new joint.dia.Paper({
+        el: $("#"+this.eleId),
+        width: window.screen.availWidth,
+        height: (window.screen.availHeight),
+        model: graph,
+        gridSize: 10,
+        restrictTranslate: true,
+        elementView: CustomElementView,
+        linkView: CustomLinkView
+      });
+
       $("#robj").html('');
       var paper_1 = new joint.dia.Paper({
         el: $("#robj"),
@@ -96,18 +110,22 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         linkView: CustomLinkView
       });
 
-      graph.on('remove', function(view) {
+      graph.on('remove', function(view){
         var cell = view.model;
-        if(cell && cell.get('type') == 'basic.Rect'){
-          var obj = that.objects.findWhere({graphId: cell.get('id')});
-          cell.set(that.pKey, {hidden: true});
-          var key = that.pKey+"#"+obj.get("friendlyName");
-          window.tildaCache[key] = cell.toJSON();
-          if(obj == null){
-            obj = that.collection.findWhere({graphId: cell.get('id')})
+        if(cell && cell.get('type') == 'basic.Rect')
+        {
+          var obj = that.objects.findWhere({friendlyName: cell.get('attrs').id}, {caseInsensitive: true});
+          if(obj == null)
+          {
+            obj = that.collection.findWhere({friendlyName: cell.get('attrs').id}, {caseInsensitive: true});
           }
+          obj = obj.clone();
+          cell.set(that.pKey, {hidden: true});
+          var key = that.pKey+"#"+obj.get("friendlyName")+".hidden";
+          window.tildaCache[key] = cell.toJSON();
           obj.set({graphId: null, rendered: false, nocache: true});
           var objFn = renderObject[obj.get("_type")];
+          graph_1.addCell(cell);
           var t = objFn(graph_1, obj, {'x': x, 'y': y}, undefined, that.pKey+".hidden", elementChangeHandler);
           paper_1.scale(that.currentScale);
           y = y+40;
@@ -118,9 +136,9 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
       graph_1.on('remove', function(view) {
         var cell = view.model;
         if(cell && cell.get('type') == 'basic.Rect'){
-          var object = that.objects.findWhere({graphId: cell.get('id')})
-          if(object == null){
-            object = that.collection.findWhere({graphId: cell.get('id')})
+          var obj = that.objects.findWhere({friendlyName: cell.get('attrs').id}, {caseInsensitive: true});
+          if(obj == null){
+            obj = that.collection.findWhere({friendlyName: cell.get('attrs').id}, {caseInsensitive: true});
           }
           cell.unset(that.pKey);
           var key = that.pKey+"#"+object.get("friendlyName");
@@ -146,16 +164,6 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         }
       })
 
-      var paper = new joint.dia.Paper({
-        el: $("#"+this.eleId),
-        width: window.screen.availWidth,
-        height: (window.screen.availHeight),
-        model: graph,
-        gridSize: 10,
-        restrictTranslate: true,
-        elementView: CustomElementView,
-        linkView: CustomLinkView
-      });
       this.paper = paper;
       var V = joint.V;
       window.paper = paper;
