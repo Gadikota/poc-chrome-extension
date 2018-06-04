@@ -9,7 +9,7 @@ function(ParserElement, Collection){
         var objectName = value.name;
         var searchableName = schemaName+"."+value.name.toLowerCase();
         var friendlyName = value.name.toLowerCase();
-        console.error(friendlyName);
+        // console.error(friendlyName);
         var references = [];
         _.each(value.primaryColumns, function(column, j){
           if(column.sameas != null){
@@ -82,6 +82,7 @@ function(ParserElement, Collection){
           _type: _type,
           references: references,
           friendlyName: friendlyName,
+          inSchema: true,
           data: {}
         })
         collection.add(element);
@@ -130,7 +131,25 @@ function(ParserElement, Collection){
             if(refObj != null){
               refObjs.push(refObj)
             } else {
-              console.error("Cannot find reference--> "+ref+" --> for "+element.get("name"));
+              var schemaName = ref.split(".")[0];
+              var searchableName = ref;
+              var objectName = ref.split(".")[1];
+              var _type = "Object";
+              var friendlyName = objectName.toLowerCase();
+              var element = new ParserElement();
+              element.set({
+                schemaName: schemaName,
+                searchableName: searchableName,
+                name: objectName,
+                _type: _type,
+                references: [],
+                inSchema: false,
+                friendlyName: friendlyName,
+                data: {}
+              })
+              this.collection.add(element);
+              refObjs.push(element);
+              // console.error("Cannot find reference--> "+ref+" --> for "+element.get("name"));
             }
           })
         }

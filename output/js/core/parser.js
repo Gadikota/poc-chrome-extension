@@ -1,8 +1,7 @@
 define(["jointjs", "./parser_element",
  "./custom_element_view", "./helpers", 
  "./relation_renderer", "./custom_object_collection"],
-function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
-
+function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection, gridLayout){
   function offsetToLocalPoint(paper, x, y) {
     var svgPoint = paper.svg.createSVGPoint();
     svgPoint.x = x;
@@ -86,6 +85,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           currentPos.x = 150;
           currentPos.y = currentPos.y+300;
         } else{
+          currentPos.y = 150;
           currentPos.x = currentPos.x+300;
         }
         return currentPos;
@@ -116,6 +116,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
         linkView: CustomLinkView
       });
 
+
       graph.on('remove', function(view){
         var cell = view.model;
         if(cell && cell.get('type') == 'basic.Rect')
@@ -128,6 +129,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
             obj = that.collection.findWhere({friendlyName: id}, {caseInsensitive: true});
           }
           var key = that.pKey+"#"+obj.get("friendlyName");
+          cell.set({hidden: true});
           window.tildaCache[key] = cell.toJSON();
           obj.set({graphId: null, rendered: false, nocache: true});
           var objFn = renderObject[obj.get("_type")];
@@ -155,6 +157,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
           }
           obj.set({graphId: null, rendered: false});
           obj.unset('hidden');
+          cell.unset('hidden');
           if(x <= $('#robj').width() && y > 0)
           {
             y = y - 60;
