@@ -7,7 +7,9 @@ function(ParserElement, Collection){
       _.each(elementArr, function(value, i){
         var schemaName = package.split(".")[1];
         var objectName = value.name;
-        var friendlyName = schemaName+"."+value.name.toLowerCase();
+        var searchableName = schemaName+"."+value.name.toLowerCase();
+        var friendlyName = value.name.toLowerCase();
+        console.error(friendlyName);
         var references = [];
         _.each(value.primaryColumns, function(column, j){
           if(column.sameas != null){
@@ -24,22 +26,7 @@ function(ParserElement, Collection){
             }
           }
         })
-        if(_type.toLowerCase() != "view")
-        {
-          _.each(value.foreign, function(foreign, j){
-            var sameas = foreign.destObject.split(".").reverse();
-            var reference = sameas[0];
-            var schema = sameas[1];
-            schema = schema || schemaName;
-            if(reference != null){
-              reference = schema+"."+reference.toLowerCase();
-              if(references.indexOf(reference) == -1){
-                references.push(reference);
-              }
-            }
-          })
-        }
-        else
+        if(_type.toLowerCase() == "view")
         {
           _.each(value.columns, function(column, j){
             if(column.sameas != null){
@@ -56,9 +43,41 @@ function(ParserElement, Collection){
              }
            })
         }
+        else
+        {
+          _.each(value.foreign, function(foreign, j){
+            var sameas = foreign.destObject.split(".").reverse();
+            var reference = sameas[0];
+            var schema = sameas[1];
+            schema = schema || schemaName;
+            if(reference != null){
+              reference = schema+"."+reference.toLowerCase();
+              if(references.indexOf(reference) == -1){
+                references.push(reference);
+              }
+            }
+          })
+          _.each(value.columns, function(column, k)
+          {
+            if(column.mapper != null && column.mapper.destObject != null)
+            {
+              var sameas = column.mapper.destObject.split(".").reverse();
+              var reference = sameas[0];
+              var schema = sameas[1];
+              schema = schema || schemaName;
+              if(reference != null){
+                reference = schema+"."+reference.toLowerCase();
+                if(references.indexOf(reference) == -1){
+                  references.push(reference);
+                }
+              }
+            }
+          });
+        }
         var element = new ParserElement();
         element.set({
           schemaName: schemaName,
+          searchableName: searchableName,
           name: objectName,
           _type: _type,
           references: references,
@@ -106,7 +125,7 @@ function(ParserElement, Collection){
         var refObjs = [];
         if( references != null && references.length > 0){
           _.each(references, function(ref, i){
-            var refObj = collection.findWhere( {friendlyName: ref }, {caseInsensitive: true})
+            var refObj = collection.findWhere( {searchableName: ref }, {caseInsensitive: true})
             if(refObj != null){
               refObjs.push(refObj)
             } else {
