@@ -107,7 +107,8 @@ function(ParserElement, Collection){
         readFile(index+1);
       }
       if(fileEntry){
-        fileEntry.file(function(file){
+        fileEntry.file(function(file)
+        {
           reader.readAsText(file);
         });
       }

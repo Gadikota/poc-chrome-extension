@@ -9,6 +9,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
     return currentPos;
   }
   var X = {};
+
   var renderView = function(graph, object, position, objectAttr, package, elementChangeHandler){
     var renderFn = function(g, o, p, attr, pkg){
       if(attr == null){

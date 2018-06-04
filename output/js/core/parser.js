@@ -29,6 +29,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
     this.collection = window.collection.clone();
     this.schemaName = this.package.split(".")[1];
     this.pKey = opts.package+"."+this.opts.name;
+    this.canvasName = this.opts.name;
     this.currentScale = this.opts.scale || 1;
     console.log("Scale --> "+this.currentScale);
     var that = this;
