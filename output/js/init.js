@@ -16,7 +16,6 @@ window.addEventListener('load', function(){
       lodash: 'lib/lodash',
       backbone: 'lib/backbone',
       jointjs: 'lib/joint',
-      gridLayout: 'lib/GridLayout.min',
       graphlib: 'lib/graphlib.core'
     },
     map: {

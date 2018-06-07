@@ -1,7 +1,7 @@
 define(["jointjs", "./parser_element",
  "./custom_element_view", "./helpers", 
  "./relation_renderer", "./custom_object_collection"],
-function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection, gridLayout){
+function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection){
   function offsetToLocalPoint(paper, x, y) {
     var svgPoint = paper.svg.createSVGPoint();
     svgPoint.x = x;
@@ -93,7 +93,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection, gri
 
       var graph = new joint.dia.Graph;
       var graph_1 = new joint.dia.Graph;
-
+      graph_1.set("docket_view", true);
       var paper = new joint.dia.Paper({
         el: $("#"+this.eleId),
         width: window.screen.availWidth,
@@ -133,7 +133,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection, gri
           window.tildaCache[key] = cell.toJSON();
           obj.set({graphId: null, rendered: false, nocache: true});
           var objFn = renderObject[obj.get("_type")];
-          var t = objFn(graph_1, obj, {'x': x, 'y': y}, undefined, that.pKey+".hidden", elementChangeHandler);
+          var t = objFn(graph_1, obj, {'x': x, 'y': y}, undefined, key+".hidden", elementChangeHandler);
           t.set({gPosition: currentPosition});          
           paper_1.scale(that.currentScale);
           x = x+200;
@@ -158,6 +158,8 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection, gri
           obj.set({graphId: null, rendered: false});
           obj.unset('hidden');
           cell.unset('hidden');
+          var key = that.pKey+"#"+obj.get("friendlyName");
+          window.tildaCache[key+".hidden"] = cell.toJSON();
           if(x <= $('#robj').width() && y > 0)
           {
             y = y - 60;
@@ -249,7 +251,7 @@ function(joint, ParserElement, CEV, Helpers, LinkRenderer, ObjectCollection, gri
       this.render();
     } catch(e){
       console.error(e.message);
-      console.error(e.stack)
+      console.error(e.stack);
     }
   }
 

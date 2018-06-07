@@ -98,13 +98,20 @@ function(ParserElement, Collection){
       var fileEntry = fileEntries[index];
       console.log("Reading -> "+fileEntry.name);
       reader.onload = function(e) {
-        var package = fileEntry.name; 
-        var schema = JSON.parse(event.target.result);
-        pushElement(package, schema.objects, "Object")
-        pushElement(package, schema.mappers, "Mapper")
-        pushElement(package, schema.enumerations, "Enumeration")
-        pushElement(package, schema.views, "View")
-
+        var package = fileEntry.name;
+        try
+        {
+          var schema = JSON.parse(event.target.result);
+          pushElement(package, schema.objects, "Object")
+          pushElement(package, schema.mappers, "Mapper")
+          pushElement(package, schema.enumerations, "Enumeration")
+          pushElement(package, schema.views, "View")          
+        }
+        catch(e)
+        {
+          console.error(e.message);
+          console.error(e.stack);
+        }
         readFile(index+1);
       }
       if(fileEntry){

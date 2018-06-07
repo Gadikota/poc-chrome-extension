@@ -16,12 +16,16 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         var name = o.get("schemaName")+"."+o.get("name");
         attr = {
-          size: { width: name.length*12, height: 30 },
+          size: { width: name.length*12+(name.length <=7 ? 20 : 0 ), height: 30 },
           attrs: { 
             rect: { fill: 'rgb(169,209,142)', stroke: "rgb(0,176,80)", "stroke-width": 1, "stroke-dasharray": "3,3" },
             text: { text: name, fill: 'black'} 
           }
         }
+        // if(graph.get("docket_view") != true)
+        // {
+        //   attr["hidden"] = true;
+        // }
       }
       if(p != null)
       {
@@ -30,10 +34,10 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})
-        console.log("Hidden -> "+t.get('hidden'));
         if(t.get('hidden') == true)
         {
-          graph.trigger('remove', {model: t})
+          t.set({customId: o.get("friendlyName")});
+          g.trigger('remove', {model: t})
           return null;
         }
         else
@@ -71,7 +75,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         // , "stroke-dasharray": "3,3"  },
         attr = {
-          size: { width: name.length*12, height: 30 },
+          size: { width: name.length*12+(name.length <=7 ? 20 : 0 ), height: 30 },
           attrs: {
             text: { text: name, fill: 'white'}
           }
@@ -88,14 +92,18 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         {
           attr["attrs"]["rect"] = { fill: 'rgb(166,201,232)', stroke: "white", "stroke-width": 0  }
         }
+        // if(graph.get("docket_view") != true)
+        // {
+        //   attr["hidden"] = true;
+        // }
       }
       // attr.model = new joint.shapes.devs.Model(attr).clone()
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})
-        console.log("Hidden -> "+t.get('hidden'));
         if(t.get('hidden') == true)
         {
+          t.set({customId: o.get("friendlyName")});
           g.trigger('remove', {model: t})
           return null;
         }
@@ -132,12 +140,16 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         var name = o.get("schemaName")+"."+o.get("name");
         attr = {
           position: p,
-          size: { width: name.length*12, height: 30 },
+          size: { width: name.length*12+(name.length <=7 ? 20 : 0 ), height: 30 },
           attrs: { 
               rect: { fill: 'rgb(251,229,214)', stroke: "rgb(248,203,173)", "stroke-width": 1  },
             text: { text: name, fill: 'black'} 
           } 
         }
+        // if(graph.get("docket_view") != true)
+        // {
+        //   attr["hidden"] = true;
+        // }
       }
       if(p != null)
       {
@@ -147,10 +159,10 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})
-        console.log("Hidden -> "+t.get('hidden'));
         if(t.get('hidden') == true)
         {
-          graph.trigger('remove', {model: t})
+          t.set({customId: o.get("friendlyName")});
+          g.trigger('remove', {model: t})
           return null;
         }
         else
@@ -187,12 +199,16 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         var name = o.get("schemaName")+"."+o.get("name");
         attr = {
-          size: { width: name.length*12, height: 30 },
+          size: { width: name.length*12+(name.length <=7 ? 40 : 0 ), height: 30 },
           attrs: { 
               rect: { fill: 'rgb(248,203,173)', stroke: "rgb(244,177,131)", "stroke-width": 2  },
             text: { text: name, fill: 'black'} 
           } 
         }
+        // if(grap.hget("docket_view") != true)
+        // {
+        //   attr["hidden"] = true;
+        // }
       }
       if(p != null)
       {
@@ -203,10 +219,10 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(o.get('graphId') == null){
         var t = new joint.shapes.basic.CustomRect(attr);
         o.set({graphId: t.id, rendered: true, package: package})
-        console.log("Hidden -> "+t.get('hidden'));
         if(t.get('hidden') == true)
         {
-          graph.trigger('remove', {model: t})
+          t.set({customId: o.get("friendlyName")});
+          g.trigger('remove', {model: t})
           return null;
         }
         else
