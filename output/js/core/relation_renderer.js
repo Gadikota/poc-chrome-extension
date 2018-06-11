@@ -111,7 +111,8 @@ define(["jointjs", "lodash", "jquery",
     "Object": objRel,
     "View": objRel,
     "onlyView": objRel,
-    "Mapper": objRel
+    "Mapper": objRel,
+    "findByCustomId": findByCustomId
   }
   return renderObjectRelations;
 });

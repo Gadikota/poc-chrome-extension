@@ -16,7 +16,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         var name = o.get("schemaName")+"."+o.get("name");
         attr = {
-          size: { width: name.length*12+(name.length <=7 ? 20 : 0 ), height: 30 },
+          size: { width: name.length*12, height: 30 },
           attrs: { 
             rect: { fill: 'rgb(169,209,142)', stroke: "rgb(0,176,80)", "stroke-width": 1, "stroke-dasharray": "3,3" },
             text: { text: name, fill: 'black'} 
@@ -31,8 +31,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       {
         attr["position"] = p;
       }
+      var width = attr["size"]["width"];
+      width = width + (width <=(7*12) ? 20 : 0);
+      attr["size"]["width"] = width;
       if(o.get('graphId') == null){
-        var t = new joint.shapes.basic.CustomRect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr).clone();
         o.set({graphId: t.id, rendered: true, package: package})
         if(t.get('hidden') == true)
         {
@@ -75,7 +78,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       if(attr == null){
         // , "stroke-dasharray": "3,3"  },
         attr = {
-          size: { width: name.length*12+(name.length <=7 ? 20 : 0 ), height: 30 },
+          size: { width: name.length*12, height: 30 },
           attrs: {
             text: { text: name, fill: 'white'}
           }
@@ -98,8 +101,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         // }
       }
       // attr.model = new joint.shapes.devs.Model(attr).clone()
+      var width = attr["size"]["width"];
+      width = width + (width <=(7*12) ? 20 : 0);
+      attr["size"]["width"] = width;
       if(o.get('graphId') == null){
-        var t = new joint.shapes.basic.CustomRect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr).clone();
         o.set({graphId: t.id, rendered: true, package: package})
         if(t.get('hidden') == true)
         {
@@ -140,7 +146,7 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         var name = o.get("schemaName")+"."+o.get("name");
         attr = {
           position: p,
-          size: { width: name.length*12+(name.length <=7 ? 20 : 0 ), height: 30 },
+          size: { width: name.length*12, height: 30 },
           attrs: { 
               rect: { fill: 'rgb(251,229,214)', stroke: "rgb(248,203,173)", "stroke-width": 1  },
             text: { text: name, fill: 'black'} 
@@ -156,8 +162,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
         attr["position"] = p;
       }
       // attr.model = new joint.shapes.devs.Model(attr).clone()
+      var width = attr["size"]["width"];
+      attr["size"]["width"] = width;
+      width = width + (width <=(7*12) ? 20 : 0);
       if(o.get('graphId') == null){
-        var t = new joint.shapes.basic.CustomRect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr).clone();
         o.set({graphId: t.id, rendered: true, package: package})
         if(t.get('hidden') == true)
         {
@@ -216,8 +225,11 @@ define(["jointjs", "lodash", "jquery"], function(joint, _, $){
       }
 
       // attr.model = new joint.shapes.devs.Model(attr).clone()
+      var width = attr["size"]["width"];
+      width = width + (width <=(7*12) ? 20 : 0);
+      attr["size"]["width"] = width;
       if(o.get('graphId') == null){
-        var t = new joint.shapes.basic.CustomRect(attr);
+        var t = new joint.shapes.basic.CustomRect(attr).clone();
         o.set({graphId: t.id, rendered: true, package: package})
         if(t.get('hidden') == true)
         {
